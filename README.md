@@ -109,3 +109,8 @@ python -m streamlit run dashboard/dashboard.py
 - Create/update review events are added to the hash-chained audit log.
 - Reviews reload when the dashboard restarts, provided the same local database is used.
 - This persistence is for the research prototype and does not establish production-grade audit integrity or secure multi-user deployment.
+
+
+## Dashboard risk analytics
+
+The dashboard includes charts for incident counts by risk level and disposition, plus a risk-score distribution. These charts summarize the currently generated synthetic incident alerts and are intended for analyst triage—not proof of malicious behavior.
