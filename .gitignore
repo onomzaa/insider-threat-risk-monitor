@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+data/analysts.json
+data/cases.db
+data/cases.db-shm
+data/cases.db-wal
