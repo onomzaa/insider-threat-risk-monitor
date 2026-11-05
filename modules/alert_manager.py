@@ -37,3 +37,13 @@ def priority(alert):
     return (status_order.get(alert.get("status", "Open"), 0),
             risk_order.get(alert.get("risk_level", "Low"), 2),
             -int(alert.get("risk_score", 0)))
+
+
+def filter_alerts(alerts, risk_level="All", status="All", query=""):
+    """Return alerts matching queue filters; search Alert ID and employee ID."""
+    needle = str(query).strip().lower()
+    return [alert for alert in alerts
+            if (risk_level == "All" or alert.get("risk_level", "Low") == risk_level)
+            and (status == "All" or alert.get("status", "Open") == status)
+            and (not needle or needle in str(alert.get("alert_id", "")).lower()
+                 or needle in str(alert.get("employee_id", "")).lower())]
