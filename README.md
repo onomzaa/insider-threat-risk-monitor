@@ -101,3 +101,11 @@ python -m streamlit run dashboard/dashboard.py
 - Analysts can change their own password after verifying the current password.
 - Dashboard sessions expire after 15 minutes without a Streamlit rerun and after 8 hours absolute. Expiry is checked when the app reruns (this prototype does not run a background idle timer).
 - These controls are prototype safeguards, not production-grade identity/session management. Use only on a trusted local machine and synthetic/authorized data.
+
+
+## Persistent alert review workflow
+- Analyst alert dispositions (status and review note) are stored in SQLite in the same local database file as case management.
+- Each saved review records the analyst username and UTC review timestamp.
+- Create/update review events are added to the hash-chained audit log.
+- Reviews reload when the dashboard restarts, provided the same local database is used.
+- This persistence is for the research prototype and does not establish production-grade audit integrity or secure multi-user deployment.
