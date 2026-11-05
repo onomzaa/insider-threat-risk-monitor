@@ -5,23 +5,40 @@ A student research prototype for insider-threat monitoring. It compares a simple
 ## Research basis
 Motivated by published work on behavior detection, event-based detection, explainability, human context, and evaluation limits. It is not a production security product or proof that unusual activity is malicious.
 
-## Implementation roadmap
-- [x] Step 01 — Repository and project plan
-- [ ] Step 02 — Activity data and loader
-- [ ] Step 03 — Baseline detector
-- [ ] Step 04 — Event correlation
-- [ ] Step 05 — Context analysis
-- [ ] Step 06 — Explainable risk scoring
-- [ ] Step 07 — Alert manager
-- [ ] Step 08 — Dashboard
-- [ ] Step 09 — Scenario tests
-- [ ] Step 10 — Evaluation and results
-- [ ] Step 11 — Final documentation
+## Implemented modules
+- `modules/event_correlator.py` — groups events for the same employee within a time window.
+- `modules/context_analyzer.py` — checks role scope, after-hours activity, sensitive resources, and review-worthy actions.
+- `modules/risk_engine.py` — transparent 0–100 score with human-readable reasons.
+- `tests/test_risk_engine.py` — basic unit tests.
 
-## Run locally
-Python 3.10+:
-```bash
-python -m pip install -r requirements.txt
-python main.py
+## Run tests
+From the project root:
+```powershell
+python -m unittest discover -s tests -v
 ```
-Use synthetic/sample records only. Alerts are investigation leads, not findings of wrongdoing.
+
+## Example integration
+```python
+from modules.event_correlator import correlate_events
+from modules.context_analyzer import analyze_context
+from modules.risk_engine import score_incident
+
+incidents = correlate_events(events, window_minutes=60)
+for incident in incidents:
+    contexts = [analyze_context(e, user_profiles) for e in incident["events"]]
+    result = score_incident(incident["events"], contexts)
+    print(incident["employee_id"], result)
+```
+
+## Roadmap
+- [x] Repository and project plan
+- [x] Event correlation
+- [x] Context analysis
+- [x] Explainable risk scoring
+- [ ] Connect modules to activity loader and dashboard
+- [ ] Alert manager and scenario tests
+- [ ] Baseline-vs-improved evaluation
+- [ ] Final documentation and presentation
+
+## Responsible use
+Use synthetic or authorized activity logs only. Restrict access to logs, minimize personal data, and require a human analyst to validate alerts. A high score is not proof of malicious intent.
