@@ -168,6 +168,14 @@ if alerts:
  if filtered_alerts:
   st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in filtered_alerts])
   a=next(x for x in filtered_alerts if x["alert_id"]==selected)
+  st.subheader("Incident timeline")
+  employee_events=[event for event in records if event["employee_id"]==a["employee_id"]]
+  timeline=pd.DataFrame([{"Timestamp":event["timestamp"],"Action":event["action"],
+   "Resource":event["resource"],"After hours":event["after_hours"],
+   "Sensitive resource":event["sensitive"],"Details":event["details"]}
+   for event in sorted(employee_events,key=lambda e:e["timestamp"])])
+  st.caption("Chronological activity for this employee (synthetic dataset); contextual indicators do not prove wrongdoing.")
+  st.dataframe(timeline,width="stretch",hide_index=True)
   st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
   if a.get("reviewed_by"):
    st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
