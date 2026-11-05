@@ -114,3 +114,8 @@ python -m streamlit run dashboard/dashboard.py
 ## Dashboard risk analytics
 
 The dashboard includes charts for incident counts by risk level and disposition, plus a risk-score distribution. These charts summarize the currently generated synthetic incident alerts and are intended for analyst triage—not proof of malicious behavior.
+
+
+## Incident activity timeline
+
+The analyst review panel displays a chronological activity timeline for the selected employee, including timestamps, actions, resources, after-hours and sensitive-resource indicators, and event details. The view uses the project's synthetic activity records; indicators are contextual and are not proof of misconduct.
