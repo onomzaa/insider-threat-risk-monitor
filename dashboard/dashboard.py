@@ -39,7 +39,7 @@ st.caption("Scores prioritize review; they do not prove malicious intent.")
 if alerts:
  table=pd.DataFrame([{"Alert ID":a["alert_id"],"Employee":a["employee_id"],"Events":a["event_count"],
  "Score":a["risk_score"],"Level":a["risk_level"],"Status":a["status"],"Reasons":"; ".join(a["reasons"])} for a in alerts])
- st.dataframe(table,use_container_width=True,hide_index=True)
+ st.dataframe(table,width="stretch",hide_index=True)
  st.download_button("Export alert queue (CSV)",table.to_csv(index=False).encode(),"alert_queue.csv","text/csv")
  st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in alerts])
  a=next(x for x in alerts if x["alert_id"]==selected)
@@ -53,5 +53,5 @@ if alerts:
   st.session_state.alert_reviews[selected]={"status":revised["status"],"analyst_note":revised["analyst_note"],"reviewed_at":revised["reviewed_at"]}
   st.success("Review saved for this active session.")
 else: st.info("No incidents were generated.")
-st.subheader("Baseline alerts"); st.dataframe(baseline,use_container_width=True)
-st.subheader("Activity log"); st.dataframe(df,use_container_width=True)
+st.subheader("Baseline alerts"); st.dataframe(baseline,width="stretch")
+st.subheader("Activity log"); st.dataframe(df,width="stretch")
