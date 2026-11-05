@@ -57,5 +57,42 @@ if alerts:
   st.session_state.alert_reviews[selected]={"status":revised["status"],"analyst_note":revised["analyst_note"],"reviewed_at":revised["reviewed_at"]}
   st.success("Review saved for this active session.")
 else: st.info("No incidents were generated.")
+st.subheader("Persistent investigation cases")
+st.caption("SQLite-backed cases persist after dashboard restarts. Prototype only; no authentication is implemented.")
+if alerts:
+    alert_id = st.selectbox("Alert to create a case from", [a["alert_id"] for a in alerts], key="case_alert")
+    if st.button("Create or open case"):
+        selected_alert = next(a for a in alerts if a["alert_id"] == alert_id)
+        case, created = create_case(selected_alert)
+        st.success(("Created" if created else "Opened existing") + f" case #{case['case_id']}")
+cases = list_cases()
+if cases:
+    labels = {f"Case #{c['case_id']} — {c['alert_id']} ({c['status']})": c for c in cases}
+    label = st.selectbox("Case to investigate", list(labels), key="case_pick")
+    case = labels[label]
+    st.write(f"**Alert:** {case['alert_id']} | **Risk:** {case['risk_score']}/100")
+    with st.form("case_editor"):
+        case_status = st.selectbox("Status", ["Open", "Under Review", "Resolved", "False Positive"],
+            index=["Open", "Under Review", "Resolved", "False Positive"].index(case["status"]))
+        assigned = st.text_input("Assigned analyst", case["assigned_to"])
+        notes = st.text_area("Investigation notes", case["analyst_notes"])
+        submitted = st.form_submit_button("Save case")
+    if submitted:
+        update_case(case["case_id"], case_status, assigned, notes)
+        st.success("Case saved to database.")
+        st.rerun()
+    st.write("**Case history**")
+    history = get_case_history(case["case_id"])
+    st.dataframe(pd.DataFrame(history), width="stretch", hide_index=True)
+    st.download_button("Export history CSV", pd.DataFrame(history).to_csv(index=False).encode(),
+                       f"case_{case['case_id']}_history.csv", "text/csv")
+else:
+    st.info("No investigation cases yet. Create one from an alert.")
+st.subheader("Case register")
+if cases:
+    st.dataframe(pd.DataFrame(cases), width="stretch", hide_index=True)
+else:
+    st.caption("The case register is empty.")
+
 st.subheader("Baseline alerts"); st.dataframe(baseline,width="stretch")
 st.subheader("Activity log"); st.dataframe(df,width="stretch")
