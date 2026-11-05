@@ -1,0 +1,11 @@
+timestamp,employee_id,role,action,resource,details,after_hours,sensitive,allowed_resources,ground_truth
+2026-11-01T09:00:00,u1,Analyst,login,workstation,normal start,false,false,workstation;report.csv,0
+2026-11-01T09:05:00,u1,Analyst,view,report.csv,normal report read,false,false,workstation;report.csv,0
+2026-11-01T22:00:00,u2,Staff,download,payroll.csv,unauthorized bulk download,true,true,workstation,1
+2026-11-01T22:05:00,u2,Staff,export,payroll.csv,unauthorized export,true,true,workstation,1
+2026-11-01T22:10:00,u2,Staff,share,payroll.csv,attempted external sharing,true,true,workstation,1
+2026-11-02T10:00:00,u3,HR,view,employee_records,authorized access,false,true,employee_records;workstation,0
+2026-11-02T10:10:00,u3,HR,download,employee_records,approved HR task,false,true,employee_records;workstation,0
+2026-11-02T23:00:00,u4,Analyst,delete,customer_records,unapproved deletion,true,true,workstation;report.csv,1
+2026-11-02T23:04:00,u4,Analyst,export,customer_records,unapproved export,true,true,workstation;report.csv,1
+2026-11-02T23:08:00,u4,Analyst,share,customer_records,external sharing attempt,true,true,workstation;report.csv,1
