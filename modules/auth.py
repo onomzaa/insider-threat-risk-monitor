@@ -78,3 +78,17 @@ def can(permission, role):
         "manage_users": {"admin"},
     }
     return role in rules.get(permission, set())
+
+
+def change_password(username, current_password, new_password, path=DEFAULT_USERS_FILE):
+    """Change the authenticated user's password after verifying the current one."""
+    username = str(username).strip()
+    users = load_users(path)
+    record = users.get(username)
+    if not record or not verify_password(current_password, record):
+        raise ValueError("Current password is incorrect")
+    updated = hash_password(new_password)
+    record.update(updated)
+    users[username] = record
+    save_users(users, path)
+    return True
