@@ -137,6 +137,8 @@ if alerts:
  st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in alerts])
  a=next(x for x in alerts if x["alert_id"]==selected)
  st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
+ if a.get("reviewed_by"):
+  st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
  st.write("**Why this score?**")
  if a.get("risk_factors"):
   st.dataframe(pd.DataFrame(a["risk_factors"]),width="stretch",hide_index=True)
