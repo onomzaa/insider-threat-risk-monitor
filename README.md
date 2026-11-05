@@ -1,6 +1,8 @@
-# Insider Threat Risk Monitor
+# Insider Threat Risk Monitor (ITRM)
 
-A student research prototype for insider-threat monitoring. It compares a simple activity-rule baseline with an improved event-correlation and context-aware alerting layer.
+A research-backed cybersecurity prototype being developed toward an organizational insider-threat monitoring and investigation platform. It compares a transparent activity-rule baseline with event correlation and context-aware, explainable alert triage. **Current status: early prototype—not production-ready.**
+
+See [Product Requirements and Roadmap](docs/PRODUCT_REQUIREMENTS.md) for the intended organizational use, MVP acceptance criteria, privacy safeguards, and deployment stages.
 
 ## Research basis
 Motivated by published work on behavior detection, event-based detection, explainability, human context, and evaluation limits. It is not a production security product or proof that unusual activity is malicious.
