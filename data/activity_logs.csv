@@ -1,0 +1,10 @@
+timestamp,user,role,event,resource,details
+2026-11-01T08:10:00,emp01,Analyst,login,workstation,normal login
+2026-11-01T09:05:00,emp01,Analyst,file_access,report.csv,normal report access
+2026-11-01T09:20:00,emp02,HR,login,workstation,normal login
+2026-11-01T10:00:00,emp02,HR,file_access,employee_records,authorized records access
+2026-11-01T22:45:00,emp03,Finance,file_access,payroll.csv,after-hours access
+2026-11-01T22:50:00,emp03,Finance,download,payroll.csv,large download
+2026-11-01T22:55:00,emp03,Finance,usb_copy,payroll.csv,copy to removable media
+2026-11-02T08:00:00,emp04,IT,login,workstation,normal login
+2026-11-02T08:15:00,emp04,IT,privilege_change,admin_access,privilege escalation event
