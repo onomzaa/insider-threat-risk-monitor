@@ -147,8 +147,11 @@ if alerts:
    "Alerts":[sum(a["status"]==status for a in alerts) for status in disposition_order]})
   st.bar_chart(disposition_counts.set_index("Disposition"),width="stretch")
  st.caption("Risk score distribution (0–100)")
- score_data=pd.DataFrame({"Risk score":[int(a["risk_score"]) for a in alerts]})
- st.bar_chart(score_data.value_counts().sort_index().rename_axis("Risk score").to_frame("Alert count"),width="stretch")
+ score_values=[int(a["risk_score"]) for a in alerts]
+ score_counts=pd.Series(score_values,name="Alert count").value_counts().sort_index()
+ score_chart=pd.DataFrame({"Alert count":score_counts.values},index=score_counts.index)
+ score_chart.index.name="Risk score"
+ st.bar_chart(score_chart,width="stretch")
 else:
  st.info("Analytics will appear when incidents are generated.")
 
