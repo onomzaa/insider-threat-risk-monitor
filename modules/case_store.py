@@ -8,6 +8,8 @@ from contextlib import closing
 from pathlib import Path
 from datetime import datetime, timezone
 
+from modules.audit_log import append_audit_event
+
 DEFAULT_DB = Path(__file__).resolve().parents[1] / "data" / "cases.db"
 
 
@@ -50,9 +52,10 @@ def initialize_db(db_path=DEFAULT_DB):
         """)
 
 
-def create_case(alert, assigned_to="", db_path=DEFAULT_DB):
+def create_case(alert, assigned_to="", db_path=DEFAULT_DB, actor="analyst"):
     initialize_db(db_path)
     now = datetime.now(timezone.utc).isoformat()
+    created = False
     with closing(_connect(db_path)) as conn, conn:
         existing = conn.execute("SELECT * FROM cases WHERE alert_id=?",
                                 (str(alert["alert_id"]),)).fetchone()
@@ -67,10 +70,14 @@ def create_case(alert, assigned_to="", db_path=DEFAULT_DB):
               int(alert.get("event_count",0)), "Open", str(assigned_to).strip(),
               "", now, now))
         case_id = cur.lastrowid
-        conn.execute("INSERT INTO case_history(case_id,action,details,occurred_at) VALUES(?,?,?,?)",
-                     (case_id, "Created", f"Case created from alert {alert['alert_id']}", now))
-        row = conn.execute("SELECT * FROM cases WHERE case_id=?", (case_id,)).fetchone()
-        return dict(row), True
+        conn.execute("INSERT INTO case_history(case_id,action,details,actor,occurred_at) VALUES(?,?,?,?,?)",
+                     (case_id, "Created", f"Case created from alert {alert['alert_id']}", str(actor), now))
+        row = dict(conn.execute("SELECT * FROM cases WHERE case_id=?", (case_id,)).fetchone())
+        created = True
+    if created:
+        append_audit_event(actor, "CASE_CREATED", f"case:{case_id}",
+                           f"Created from alert {alert['alert_id']}", db_path)
+    return row, created
 
 
 def update_case(case_id, status, assigned_to="", analyst_notes="", actor="analyst",
@@ -80,24 +87,30 @@ def update_case(case_id, status, assigned_to="", analyst_notes="", actor="analys
         raise ValueError(f"Invalid case status: {status}")
     initialize_db(db_path)
     now = datetime.now(timezone.utc).isoformat()
+    audit_details = None
     with closing(_connect(db_path)) as conn, conn:
         row = conn.execute("SELECT * FROM cases WHERE case_id=?", (int(case_id),)).fetchone()
         if not row:
             raise ValueError(f"Case {case_id} does not exist")
         old = dict(row)
+        assigned_value = str(assigned_to).strip()
+        notes_value = str(analyst_notes).strip()
         conn.execute("""UPDATE cases SET status=?,assigned_to=?,analyst_notes=?,updated_at=?
                        WHERE case_id=?""",
-                     (status, str(assigned_to).strip(), str(analyst_notes).strip(), now, int(case_id)))
+                     (status, assigned_value, notes_value, now, int(case_id)))
         changes = []
         if old["status"] != status: changes.append(f"Status: {old['status']} -> {status}")
-        if old["assigned_to"] != str(assigned_to).strip(): changes.append("Assignment updated")
-        if old["analyst_notes"] != str(analyst_notes).strip(): changes.append("Analyst notes updated")
+        if old["assigned_to"] != assigned_value: changes.append("Assignment updated")
+        if old["analyst_notes"] != notes_value: changes.append("Analyst notes updated")
         if changes:
+            audit_details = "; ".join(changes)
             conn.execute("""INSERT INTO case_history(case_id,action,details,actor,occurred_at)
                            VALUES(?,?,?,?,?)""",
-                         (int(case_id), "Updated", "; ".join(changes), str(actor), now))
-        updated = conn.execute("SELECT * FROM cases WHERE case_id=?", (int(case_id),)).fetchone()
-        return dict(updated)
+                         (int(case_id), "Updated", audit_details, str(actor), now))
+        updated = dict(conn.execute("SELECT * FROM cases WHERE case_id=?", (int(case_id),)).fetchone())
+    if audit_details:
+        append_audit_event(actor, "CASE_UPDATED", f"case:{case_id}", audit_details, db_path)
+    return updated
 
 
 def list_cases(db_path=DEFAULT_DB):
