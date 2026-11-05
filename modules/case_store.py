@@ -3,7 +3,7 @@
 Use only synthetic or organization-authorized data. This prototype has no
 authentication/authorization layer and is not suitable for production deployment.
 """
-import sqlite3
+import sqlite3\nfrom contextlib import closing
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -20,7 +20,7 @@ def _connect(db_path=DEFAULT_DB):
 
 
 def initialize_db(db_path=DEFAULT_DB):
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS cases (
                 case_id INTEGER PRIMARY KEY AUTOINCREMENT,
