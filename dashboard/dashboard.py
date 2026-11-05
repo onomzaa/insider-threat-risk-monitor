@@ -9,7 +9,7 @@ from modules.risk_engine import score_incident
 from modules.alert_manager import build_alert, set_disposition, priority
 from modules.case_store import create_case, update_case, list_cases, get_case_history
 from modules.audit_log import list_audit_events, verify_audit_chain
-from modules.auth import authenticate, can
+from modules.auth import authenticate, can, create_user, load_users
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 
@@ -37,6 +37,33 @@ st.caption(f"Signed in: {analyst['username']} • Role: {analyst['role']} • Re
 if st.button("Sign out"):
     st.session_state.analyst_account = None
     st.rerun()
+
+# Account administration is restricted to administrators.
+if can("manage_users", analyst["role"]):
+    with st.expander("Admin • User management"):
+        st.caption("Create local dashboard accounts. Passwords are hashed and stored in data/analysts.json.")
+        with st.form("create_analyst_user"):
+            new_username = st.text_input("New username")
+            new_password = st.text_input("Temporary password (12+ characters)", type="password")
+            confirm_password = st.text_input("Confirm password", type="password")
+            new_role = st.selectbox("Account role", ["viewer", "analyst", "admin"])
+            create_submitted = st.form_submit_button("Create account")
+        if create_submitted:
+            if new_password != confirm_password:
+                st.error("Passwords do not match.")
+            else:
+                try:
+                    created_account = create_user(new_username, new_password, role=new_role)
+                    st.success(f"Created account: {created_account['username']} ({created_account['role']}).")
+                except (ValueError, OSError) as exc:
+                    st.error(str(exc))
+        users = load_users()
+        if users:
+            st.write("**Current accounts**")
+            st.dataframe(pd.DataFrame([
+                {"Username": name, "Role": record.get("role", "unknown")}
+                for name, record in sorted(users.items())
+            ]), width="stretch", hide_index=True)
 df=load_activity(); baseline=detect_baseline(df)
 records=[]
 for row in df.to_dict(orient="records"):
