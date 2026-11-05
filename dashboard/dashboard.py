@@ -1,6 +1,7 @@
 """Dashboard for baseline alerts, incident scoring, and analyst review."""
 import streamlit as st
 import pandas as pd
+import time
 from modules.data_loader import load_activity
 from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
@@ -31,11 +32,29 @@ if not st.session_state.analyst_account:
     st.info("First-time setup: run python -m modules.setup_admin in your project terminal.")
     st.stop()
 
+# Prototype session expiry: 15 minutes idle or 8 hours absolute.
+now = time.time()
+if "session_started_at" not in st.session_state:
+    st.session_state.session_started_at = now
+if "last_activity_at" not in st.session_state:
+    st.session_state.last_activity_at = now
+idle_expired = now - st.session_state.last_activity_at >= 15 * 60
+absolute_expired = now - st.session_state.session_started_at >= 8 * 60 * 60
+if idle_expired or absolute_expired:
+    st.session_state.analyst_account = None
+    st.session_state.pop("session_started_at", None)
+    st.session_state.pop("last_activity_at", None)
+    st.warning("Your session expired. Please sign in again.")
+    st.rerun()
+st.session_state.last_activity_at = now
+
 analyst = st.session_state.analyst_account
 st.title("Insider Threat Risk Monitor")
 st.caption(f"Signed in: {analyst['username']} • Role: {analyst['role']} • Research prototype; alerts require human review")
 if st.button("Sign out"):
     st.session_state.analyst_account = None
+    st.session_state.pop("session_started_at", None)
+    st.session_state.pop("last_activity_at", None)
     st.rerun()
 
 with st.expander("My account • Change password"):
