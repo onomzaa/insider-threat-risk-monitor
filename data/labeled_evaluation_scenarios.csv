@@ -9,3 +9,8 @@ timestamp,employee_id,role,action,resource,details,after_hours,sensitive,allowed
 2026-11-02T23:00:00,u4,Analyst,delete,customer_records,unapproved deletion,true,true,workstation;report.csv,1
 2026-11-02T23:04:00,u4,Analyst,export,customer_records,unapproved export,true,true,workstation;report.csv,1
 2026-11-02T23:08:00,u4,Analyst,share,customer_records,external sharing attempt,true,true,workstation;report.csv,1
+2026-11-03T11:00:00,u5,Analyst,download,restricted_archive,unapproved download,false,true,workstation;report.csv,1
+2026-11-03T11:04:00,u5,Analyst,export,restricted_archive,unapproved export,false,true,workstation;report.csv,1
+2026-11-03T11:08:00,u5,Analyst,share,restricted_archive,external sharing attempt,false,true,workstation;report.csv,1
+2026-11-03T23:00:00,u6,IT,login,workstation,approved maintenance login,true,false,workstation;server,0
+2026-11-03T23:05:00,u6,IT,view,server,approved maintenance check,true,false,workstation;server,0
