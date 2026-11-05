@@ -11,6 +11,7 @@ from modules.alert_manager import build_alert, set_disposition, priority
 from modules.case_store import create_case, update_case, list_cases, get_case_history
 from modules.audit_log import list_audit_events, verify_audit_chain
 from modules.auth import authenticate, can, create_user, load_users, change_password
+from modules.alert_review_store import get_review, save_review
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 
@@ -116,9 +117,13 @@ for inc in incidents:
  contexts=[analyze_context(e,profiles) for e in inc["events"]]
  alerts.append(build_alert(inc,score_incident(inc["events"],contexts),contexts))
 alerts.sort(key=priority)
-if "alert_reviews" not in st.session_state: st.session_state.alert_reviews={}
 for a in alerts:
- if a["alert_id"] in st.session_state.alert_reviews: a.update(st.session_state.alert_reviews[a["alert_id"]])
+ persisted_review = get_review(a["alert_id"])
+ if persisted_review:
+  a.update({"status": persisted_review["status"],
+            "analyst_note": persisted_review["analyst_note"],
+            "reviewed_at": persisted_review["reviewed_at"],
+            "reviewed_by": persisted_review["reviewed_by"]})
 c1,c2,c3,c4=st.columns(4)
 c1.metric("Activity records",len(df)); c2.metric("Baseline alerts",len(baseline))
 c3.metric("Incidents",len(alerts)); c4.metric("High risk",sum(a["risk_level"]=="High" for a in alerts))
@@ -141,8 +146,11 @@ if alerts:
  note=st.text_area("Analyst note",value=a.get("analyst_note",""),key="note_"+selected)
  if st.button("Save review",key="save_"+selected,disabled=not can("review",analyst["role"])):
   revised=set_disposition(a,status,note)
-  st.session_state.alert_reviews[selected]={"status":revised["status"],"analyst_note":revised["analyst_note"],"reviewed_at":revised["reviewed_at"]}
-  st.success("Review saved for this active session.")
+  persisted = save_review(selected, revised["status"], revised["analyst_note"], actor=analyst["username"])
+  a.update({"status": persisted["status"], "analyst_note": persisted["analyst_note"],
+            "reviewed_at": persisted["reviewed_at"], "reviewed_by": persisted["reviewed_by"]})
+  st.success(f"Review saved persistently by {persisted['reviewed_by']} at {persisted['reviewed_at']}.")
+  st.rerun()
 else: st.info("No incidents were generated.")
 st.subheader("Persistent investigation cases")
 st.caption("SQLite-backed cases persist after dashboard restarts. Review permissions are role-controlled.")
