@@ -14,3 +14,28 @@ timestamp,employee_id,role,action,resource,details,after_hours,sensitive,allowed
 2026-11-03T11:08:00,u5,Analyst,share,restricted_archive,external sharing attempt,false,true,workstation;report.csv,1
 2026-11-03T23:00:00,u6,IT,login,workstation,approved maintenance login,true,false,workstation;server,0
 2026-11-03T23:05:00,u6,IT,view,server,approved maintenance check,true,false,workstation;server,0
+2026-11-04T14:00:00,u7,Analyst,download,report.csv,unusual but authorized report download,false,false,report.csv;workstation,0
+2026-11-04T14:03:00,u7,Analyst,view,report.csv,review downloaded report,false,false,report.csv;workstation,0
+2026-11-04T22:00:00,u8,IT,permission_change,server,approved emergency maintenance,true,false,server;workstation,0
+2026-11-04T22:05:00,u8,IT,view,server,maintenance verification,true,false,server;workstation,0
+2026-11-05T10:00:00,u9,HR,download,payroll.csv,approved payroll processing,false,true,payroll.csv;workstation,0
+2026-11-05T10:05:00,u9,HR,export,payroll.csv,approved payroll export,false,true,payroll.csv;workstation,0
+2026-11-05T10:10:00,u9,HR,view,payroll.csv,quality check,false,true,payroll.csv;workstation,0
+2026-11-05T13:00:00,u10,Staff,download,employee_records,unauthorized single sensitive download,false,true,workstation;report.csv,1
+2026-11-05T13:03:00,u10,Staff,view,employee_records,follow-up access,false,true,workstation;report.csv,1
+2026-11-05T09:00:00,u11,Staff,login_failed,workstation,repeated failed attempts,false,false,workstation;report.csv,1
+2026-11-05T09:01:00,u11,Staff,login_failed,workstation,repeated failed attempts,false,false,workstation;report.csv,1
+2026-11-05T09:02:00,u11,Staff,login_failed,workstation,repeated failed attempts,false,false,workstation;report.csv,1
+2026-11-05T09:03:00,u11,Staff,login_failed,workstation,repeated failed attempts,false,false,workstation;report.csv,1
+2026-11-05T09:04:00,u11,Staff,login_failed,workstation,repeated failed attempts,false,false,workstation;report.csv,1
+2026-11-05T15:00:00,u12,Staff,permission_change,restricted_archive,unauthorized privilege change,false,true,workstation,1
+2026-11-05T15:02:00,u12,Staff,download,restricted_archive,bulk data download,false,true,workstation,1
+2026-11-05T15:04:00,u12,Staff,share,restricted_archive,external sharing attempt,false,true,workstation,1
+2026-11-05T21:00:00,u13,Analyst,login,workstation,late shift login,true,false,workstation;report.csv,0
+2026-11-05T21:05:00,u13,Analyst,view,report.csv,late shift report work,true,false,workstation;report.csv,0
+2026-11-05T21:10:00,u13,Analyst,view,report.csv,continued report work,true,false,workstation;report.csv,0
+2026-11-05T11:00:00,u14,Staff,export,customer_records,unauthorized export,false,true,workstation;report.csv,1
+2026-11-05T11:03:00,u14,Staff,share,customer_records,external sharing attempt,false,true,workstation;report.csv,1
+2026-11-05T11:05:00,u15,HR,view,employee_records,authorized sensitive record view,false,true,employee_records;workstation,0
+2026-11-05T11:10:00,u15,HR,view,employee_records,continued authorized review,false,true,employee_records;workstation,0
+2026-11-05T16:00:00,u16,Staff,export,payroll.csv,unauthorized single export,false,true,workstation;report.csv,1
