@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from modules.auth import create_user, authenticate, can, hash_password, verify_password
+from modules.auth import create_user, authenticate, can, hash_password, verify_password, change_password
 
 
 class AuthTests(unittest.TestCase):
@@ -24,6 +24,14 @@ class AuthTests(unittest.TestCase):
         create_user("admin1", "Secure-Password-456!", "admin", self.path)
         with self.assertRaises(ValueError):
             create_user("admin1", "Another-Password-789!", "admin", self.path)
+
+    def test_change_password_requires_current_and_updates_credentials(self):
+        create_user("analyst2", "Old-Password-123!", "analyst", self.path)
+        with self.assertRaises(ValueError):
+            change_password("analyst2", "incorrect-current", "New-Password-456!", self.path)
+        change_password("analyst2", "Old-Password-123!", "New-Password-456!", self.path)
+        self.assertIsNone(authenticate("analyst2", "Old-Password-123!", self.path))
+        self.assertEqual(authenticate("analyst2", "New-Password-456!", self.path)["role"], "analyst")
 
     def test_role_permissions(self):
         self.assertTrue(can("view", "viewer"))
