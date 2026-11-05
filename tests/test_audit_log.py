@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from contextlib import closing
 from pathlib import Path
 
 from modules.audit_log import append_audit_event, list_audit_events, verify_audit_chain
@@ -26,7 +27,7 @@ class AuditLogTests(unittest.TestCase):
         append_audit_event("analyst-a", "CASE_CREATED", "case:1", "created", self.db)
         append_audit_event("analyst-a", "CASE_UPDATED", "case:1", "status changed", self.db)
         import sqlite3
-        with sqlite3.connect(self.db) as conn:
+        with closing(sqlite3.connect(self.db)) as conn, conn:
             conn.execute("UPDATE audit_log SET details='altered' WHERE audit_id=1")
         result = verify_audit_chain(self.db)
         self.assertFalse(result["valid"])
