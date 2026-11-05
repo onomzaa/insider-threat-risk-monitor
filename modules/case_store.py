@@ -53,7 +53,7 @@ def initialize_db(db_path=DEFAULT_DB):
 def create_case(alert, assigned_to="", db_path=DEFAULT_DB):
     initialize_db(db_path)
     now = datetime.now(timezone.utc).isoformat()
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         existing = conn.execute("SELECT * FROM cases WHERE alert_id=?",
                                 (str(alert["alert_id"]),)).fetchone()
         if existing:
@@ -80,7 +80,7 @@ def update_case(case_id, status, assigned_to="", analyst_notes="", actor="analys
         raise ValueError(f"Invalid case status: {status}")
     initialize_db(db_path)
     now = datetime.now(timezone.utc).isoformat()
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         row = conn.execute("SELECT * FROM cases WHERE case_id=?", (int(case_id),)).fetchone()
         if not row:
             raise ValueError(f"Case {case_id} does not exist")
@@ -102,13 +102,13 @@ def update_case(case_id, status, assigned_to="", analyst_notes="", actor="analys
 
 def list_cases(db_path=DEFAULT_DB):
     initialize_db(db_path)
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         return [dict(r) for r in conn.execute("SELECT * FROM cases ORDER BY updated_at DESC")]
 
 
 def get_case_history(case_id, db_path=DEFAULT_DB):
     initialize_db(db_path)
-    with _connect(db_path) as conn:
+    with closing(_connect(db_path)) as conn, conn:
         return [dict(r) for r in conn.execute(
             "SELECT * FROM case_history WHERE case_id=? ORDER BY history_id DESC",
             (int(case_id),))]
