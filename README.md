@@ -83,3 +83,14 @@ After generating employee predictions, run:
 python -m evaluation.threshold_analysis
 ```
 This evaluates candidate risk thresholds from 30 to 100 in steps of 10 and writes `results/threshold_analysis.csv`. It reports precision, recall, F1, and false-positive rate at each threshold so the analyst can inspect trade-offs. Threshold analysis is exploratory: the same small synthetic set is not independent validation, and no threshold is approved for real organizational use.
+
+
+## Persistent case management (Stage 3 prototype)
+The dashboard can create investigation cases from alerts, assign an analyst, update status and notes, and inspect a case activity history. Records are stored in `data/cases.db` using SQLite and persist across dashboard restarts. Case creation is idempotent per alert ID, so the same alert does not create duplicate cases.
+
+Run the dashboard:
+```powershell
+python -m streamlit run dashboard/dashboard.py
+```
+
+**Prototype limitation:** the database currently has no authentication, role-based access, or tamper-resistant audit controls. Do not use real employee records or deploy this feature operationally until access controls, privacy review, retention, and security hardening are implemented.
