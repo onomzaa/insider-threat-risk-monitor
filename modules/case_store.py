@@ -3,7 +3,8 @@
 Use only synthetic or organization-authorized data. This prototype has no
 authentication/authorization layer and is not suitable for production deployment.
 """
-import sqlite3\nfrom contextlib import closing
+import sqlite3
+from contextlib import closing
 from pathlib import Path
 from datetime import datetime, timezone
 
