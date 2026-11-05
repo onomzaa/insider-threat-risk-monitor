@@ -60,3 +60,18 @@ python -m pytest -q
 ```
 
 The dashboard's review status is stored in Streamlit session state for demonstration; it resets when the app session restarts. It is not a persistent case-management database.
+
+
+## Research-gap evaluation (Stage 1)
+This evaluation directly tests the research gap: whether event correlation plus role/time/resource context can improve explainable insider-threat triage over simple event rules, while measuring false positives.
+
+Run from the repository root:
+```powershell
+python -m evaluation.evaluate
+```
+
+It compares both methods against the labels in `data/labeled_evaluation_scenarios.csv` and writes:
+- `results/scenario_predictions.csv` — per-employee ground truth, baseline alert, improved score, and prediction.
+- `results/evaluation_metrics.csv` — TP, FP, TN, FN, precision, recall, F1, and false-positive rate.
+
+**Research integrity:** These are hand-labeled synthetic scenarios. Metrics describe only this small test set and must not be presented as real-world organizational detection accuracy. The threshold (70) is a prototype setting, not a validated operational threshold.
