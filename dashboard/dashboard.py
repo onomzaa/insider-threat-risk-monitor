@@ -8,6 +8,7 @@ from modules.context_analyzer import analyze_context
 from modules.risk_engine import score_incident
 from modules.alert_manager import build_alert, set_disposition, priority
 from modules.case_store import create_case, update_case, list_cases, get_case_history
+from modules.audit_log import list_audit_events, verify_audit_chain
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 st.title("Insider Threat Risk Monitor")
@@ -93,6 +94,25 @@ if cases:
     st.dataframe(pd.DataFrame(cases), width="stretch", hide_index=True)
 else:
     st.caption("The case register is empty.")
+
+st.subheader("Security audit trail")
+st.caption("Audit events record case creation and changes. Hash-chain verification detects record edits; it is not a substitute for access controls or external backups.")
+audit_col1, audit_col2 = st.columns([1, 3])
+with audit_col1:
+    if st.button("Verify audit chain"):
+        verification = verify_audit_chain()
+        if verification["valid"]:
+            st.success(f"Verified {verification['checked']} audit entries.")
+        else:
+            st.error(f"Integrity failure at audit ID {verification['failed_audit_id']}: {verification['reason']}")
+audit_events = list_audit_events()
+if audit_events:
+    audit_table = pd.DataFrame(audit_events)
+    st.dataframe(audit_table, width="stretch", hide_index=True)
+    st.download_button("Export audit log (CSV)", audit_table.to_csv(index=False).encode(),
+                       "security_audit_log.csv", "text/csv")
+else:
+    st.info("No audit events recorded yet. Creating or updating a case will add entries.")
 
 st.subheader("Baseline alerts"); st.dataframe(baseline,width="stretch")
 st.subheader("Activity log"); st.dataframe(df,width="stretch")
