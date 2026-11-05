@@ -9,7 +9,7 @@ from modules.risk_engine import score_incident
 from modules.alert_manager import build_alert, set_disposition, priority
 from modules.case_store import create_case, update_case, list_cases, get_case_history
 from modules.audit_log import list_audit_events, verify_audit_chain
-from modules.auth import authenticate, can, create_user, load_users
+from modules.auth import authenticate, can, create_user, load_users, change_password
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 
@@ -37,6 +37,22 @@ st.caption(f"Signed in: {analyst['username']} • Role: {analyst['role']} • Re
 if st.button("Sign out"):
     st.session_state.analyst_account = None
     st.rerun()
+
+with st.expander("My account • Change password"):
+    with st.form("change_own_password"):
+        current_pw = st.text_input("Current password", type="password")
+        new_pw = st.text_input("New password (12+ characters)", type="password")
+        confirm_pw = st.text_input("Confirm new password", type="password")
+        password_submitted = st.form_submit_button("Update password")
+    if password_submitted:
+        if new_pw != confirm_pw:
+            st.error("New passwords do not match.")
+        else:
+            try:
+                change_password(analyst["username"], current_pw, new_pw)
+                st.success("Password changed. Use the new password next time you sign in.")
+            except ValueError as exc:
+                st.error(str(exc))
 
 # Account administration is restricted to administrators.
 if can("manage_users", analyst["role"]):
