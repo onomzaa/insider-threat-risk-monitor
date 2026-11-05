@@ -44,7 +44,10 @@ if alerts:
  st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in alerts])
  a=next(x for x in alerts if x["alert_id"]==selected)
  st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
- st.write("**Reasons:**"); [st.write("- "+reason) for reason in a["reasons"]]
+ st.write("**Why this score?**")
+ if a.get("risk_factors"):
+  st.dataframe(pd.DataFrame(a["risk_factors"]),width="stretch",hide_index=True)
+ st.write("**Explanation:**"); [st.write("- "+reason) for reason in a["reasons"]]
  status=st.selectbox("Disposition",["Open","Under Review","Resolved","False Positive"],
  index=["Open","Under Review","Resolved","False Positive"].index(a["status"]),key="status_"+selected)
  note=st.text_area("Analyst note",value=a.get("analyst_note",""),key="note_"+selected)
