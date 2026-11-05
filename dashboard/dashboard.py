@@ -7,7 +7,7 @@ from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
 from modules.context_analyzer import analyze_context
 from modules.risk_engine import score_incident
-from modules.alert_manager import build_alert, set_disposition, priority
+from modules.alert_manager import build_alert, set_disposition, priority, filter_alerts
 from modules.case_store import create_case, update_case, list_cases, get_case_history
 from modules.audit_log import list_audit_events, verify_audit_chain
 from modules.auth import authenticate, can, create_user, load_users, change_password
@@ -127,33 +127,48 @@ for a in alerts:
 c1,c2,c3,c4=st.columns(4)
 c1.metric("Activity records",len(df)); c2.metric("Baseline alerts",len(baseline))
 c3.metric("Incidents",len(alerts)); c4.metric("High risk",sum(a["risk_level"]=="High" for a in alerts))
+m1,m2,m3,m4=st.columns(4)
+m1.metric("Open alerts",sum(a["status"]=="Open" for a in alerts))
+m2.metric("High risk alerts",sum(a["risk_level"]=="High" for a in alerts))
+m3.metric("Resolved",sum(a["status"]=="Resolved" for a in alerts))
+m4.metric("False positives",sum(a["status"]=="False Positive" for a in alerts))
 st.subheader("Incident alert queue")
 st.caption("Scores prioritize review; they do not prove malicious intent.")
 if alerts:
+ f1,f2,f3=st.columns([1,1,2])
+ with f1: risk_filter=st.selectbox("Risk level",["All","High","Medium","Low"],key="alert_risk_filter")
+ with f2: status_filter=st.selectbox("Disposition",["All","Open","Under Review","Resolved","False Positive"],key="alert_status_filter")
+ with f3: alert_query=st.text_input("Search Alert ID or employee",key="alert_search")
+ filtered_alerts=filter_alerts(alerts,risk_filter,status_filter,alert_query)
+ st.caption(f"Showing {len(filtered_alerts)} of {len(alerts)} alerts")
  table=pd.DataFrame([{"Alert ID":a["alert_id"],"Employee":a["employee_id"],"Events":a["event_count"],
- "Score":a["risk_score"],"Level":a["risk_level"],"Status":a["status"],"Reasons":"; ".join(a["reasons"])} for a in alerts])
+ "Score":a["risk_score"],"Level":a["risk_level"],"Status":a["status"],"Reasons":"; ".join(a["reasons"])} for a in filtered_alerts])
  st.dataframe(table,width="stretch",hide_index=True)
- st.download_button("Export alert queue (CSV)",table.to_csv(index=False).encode(),"alert_queue.csv","text/csv")
- st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in alerts])
- a=next(x for x in alerts if x["alert_id"]==selected)
- st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
- if a.get("reviewed_by"):
-  st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
- st.write("**Why this score?**")
- if a.get("risk_factors"):
-  st.dataframe(pd.DataFrame(a["risk_factors"]),width="stretch",hide_index=True)
- st.write("**Explanation:**"); [st.write("- "+reason) for reason in a["reasons"]]
- status=st.selectbox("Disposition",["Open","Under Review","Resolved","False Positive"],
- index=["Open","Under Review","Resolved","False Positive"].index(a["status"]),key="status_"+selected)
- note=st.text_area("Analyst note",value=a.get("analyst_note",""),key="note_"+selected)
- if st.button("Save review",key="save_"+selected,disabled=not can("review",analyst["role"])):
-  revised=set_disposition(a,status,note)
-  persisted = save_review(selected, revised["status"], revised["analyst_note"], actor=analyst["username"])
-  a.update({"status": persisted["status"], "analyst_note": persisted["analyst_note"],
-            "reviewed_at": persisted["reviewed_at"], "reviewed_by": persisted["reviewed_by"]})
-  st.success(f"Review saved persistently by {persisted['reviewed_by']} at {persisted['reviewed_at']}.")
-  st.rerun()
-else: st.info("No incidents were generated.")
+ st.download_button("Export filtered alerts (CSV)",table.to_csv(index=False).encode(),"alert_queue.csv","text/csv")
+ if filtered_alerts:
+  st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in filtered_alerts])
+  a=next(x for x in filtered_alerts if x["alert_id"]==selected)
+  st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
+  if a.get("reviewed_by"):
+   st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
+  st.write("**Why this score?**")
+  if a.get("risk_factors"):
+   st.dataframe(pd.DataFrame(a["risk_factors"]),width="stretch",hide_index=True)
+  st.write("**Explanation:**"); [st.write("- "+reason) for reason in a["reasons"]]
+  status=st.selectbox("Disposition",["Open","Under Review","Resolved","False Positive"],
+   index=["Open","Under Review","Resolved","False Positive"].index(a["status"]),key="status_"+selected)
+  note=st.text_area("Analyst note",value=a.get("analyst_note",""),key="note_"+selected)
+  if st.button("Save review",key="save_"+selected,disabled=not can("review",analyst["role"])):
+   revised=set_disposition(a,status,note)
+   persisted=save_review(selected,revised["status"],revised["analyst_note"],actor=analyst["username"])
+   a.update({"status":persisted["status"],"analyst_note":persisted["analyst_note"],
+    "reviewed_at":persisted["reviewed_at"],"reviewed_by":persisted["reviewed_by"]})
+   st.success(f"Review saved persistently by {persisted['reviewed_by']} at {persisted['reviewed_at']}.")
+   st.rerun()
+ else:
+  st.info("No alerts match these filters. Adjust risk, disposition, or search.")
+else:
+ st.info("No incidents were generated.")
 st.subheader("Persistent investigation cases")
 st.caption("SQLite-backed cases persist after dashboard restarts. Review permissions are role-controlled.")
 if alerts:
