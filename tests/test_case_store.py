@@ -1,4 +1,4 @@
-import tempfile
+import tempfile\nimport gc
 import unittest
 from pathlib import Path
 from modules.case_store import create_case, update_case, list_cases, get_case_history
