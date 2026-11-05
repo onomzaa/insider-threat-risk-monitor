@@ -3,6 +3,7 @@ import gc
 import unittest
 from pathlib import Path
 from modules.case_store import create_case, update_case, list_cases, get_case_history
+from modules.audit_log import list_audit_events, verify_audit_chain
 
 class CaseStoreTests(unittest.TestCase):
     def setUp(self):
@@ -26,6 +27,9 @@ class CaseStoreTests(unittest.TestCase):
         self.assertEqual(updated["status"], "Under Review")
         self.assertEqual(updated["assigned_to"], "Analyst B")
         self.assertGreaterEqual(len(get_case_history(case["case_id"], self.db)), 2)
+        events = list_audit_events(self.db)
+        self.assertEqual([e["action"] for e in reversed(events)], ["CASE_CREATED", "CASE_UPDATED"])
+        self.assertTrue(verify_audit_chain(self.db)["valid"])
     def test_invalid_status(self):
         case, _ = create_case(self.alert, db_path=self.db)
         with self.assertRaises(ValueError):
