@@ -9,10 +9,34 @@ from modules.risk_engine import score_incident
 from modules.alert_manager import build_alert, set_disposition, priority
 from modules.case_store import create_case, update_case, list_cases, get_case_history
 from modules.audit_log import list_audit_events, verify_audit_chain
+from modules.auth import authenticate, can
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
+
+# Login gate: no dashboard data or review controls are shown before authentication.
+if "analyst_account" not in st.session_state:
+    st.session_state.analyst_account = None
+if not st.session_state.analyst_account:
+    st.title("Insider Threat Risk Monitor — Sign in")
+    with st.form("analyst_login"):
+        login_username = st.text_input("Username")
+        login_password = st.text_input("Password", type="password")
+        login_submitted = st.form_submit_button("Sign in")
+    if login_submitted:
+        account = authenticate(login_username, login_password)
+        if account:
+            st.session_state.analyst_account = account
+            st.rerun()
+        st.error("Invalid username or password.")
+    st.info("First-time setup: run python -m modules.setup_admin in your project terminal.")
+    st.stop()
+
+analyst = st.session_state.analyst_account
 st.title("Insider Threat Risk Monitor")
-st.caption("Research prototype • synthetic activity • alerts are leads for human review")
+st.caption(f"Signed in: {analyst['username']} • Role: {analyst['role']} • Research prototype; alerts require human review")
+if st.button("Sign out"):
+    st.session_state.analyst_account = None
+    st.rerun()
 df=load_activity(); baseline=detect_baseline(df)
 records=[]
 for row in df.to_dict(orient="records"):
@@ -53,18 +77,18 @@ if alerts:
  status=st.selectbox("Disposition",["Open","Under Review","Resolved","False Positive"],
  index=["Open","Under Review","Resolved","False Positive"].index(a["status"]),key="status_"+selected)
  note=st.text_area("Analyst note",value=a.get("analyst_note",""),key="note_"+selected)
- if st.button("Save review",key="save_"+selected):
+ if st.button("Save review",key="save_"+selected,disabled=not can("review",analyst["role"])):
   revised=set_disposition(a,status,note)
   st.session_state.alert_reviews[selected]={"status":revised["status"],"analyst_note":revised["analyst_note"],"reviewed_at":revised["reviewed_at"]}
   st.success("Review saved for this active session.")
 else: st.info("No incidents were generated.")
 st.subheader("Persistent investigation cases")
-st.caption("SQLite-backed cases persist after dashboard restarts. Prototype only; no authentication is implemented.")
+st.caption("SQLite-backed cases persist after dashboard restarts. Review permissions are role-controlled.")
 if alerts:
     alert_id = st.selectbox("Alert to create a case from", [a["alert_id"] for a in alerts], key="case_alert")
-    if st.button("Create or open case"):
+    if st.button("Create or open case",disabled=not can("review",analyst["role"])):
         selected_alert = next(a for a in alerts if a["alert_id"] == alert_id)
-        case, created = create_case(selected_alert)
+        case, created = create_case(selected_alert, actor=analyst["username"])
         st.success(("Created" if created else "Opened existing") + f" case #{case['case_id']}")
 cases = list_cases()
 if cases:
@@ -77,9 +101,9 @@ if cases:
             index=["Open", "Under Review", "Resolved", "False Positive"].index(case["status"]))
         assigned = st.text_input("Assigned analyst", case["assigned_to"])
         notes = st.text_area("Investigation notes", case["analyst_notes"])
-        submitted = st.form_submit_button("Save case")
+        submitted = st.form_submit_button("Save case", disabled=not can("review",analyst["role"]))
     if submitted:
-        update_case(case["case_id"], case_status, assigned, notes)
+        update_case(case["case_id"], case_status, assigned, notes, actor=analyst["username"])
         st.success("Case saved to database.")
         st.rerun()
     st.write("**Case history**")
