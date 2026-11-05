@@ -119,3 +119,8 @@ The dashboard includes charts for incident counts by risk level and disposition,
 ## Incident activity timeline
 
 The analyst review panel displays a chronological activity timeline for the selected employee, including timestamps, actions, resources, after-hours and sensitive-resource indicators, and event details. The view uses the project's synthetic activity records; indicators are contextual and are not proof of misconduct.
+
+
+## PDF investigation reports
+
+Analysts can download a PDF from the selected alert's review panel. Reports include alert identity and score, disposition/reviewer details, risk explanations, analyst and case notes, and a chronological activity table. Reports are generated locally from synthetic or authorized records and remain subject to human review.
