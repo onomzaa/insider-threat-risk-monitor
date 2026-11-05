@@ -94,3 +94,10 @@ python -m streamlit run dashboard/dashboard.py
 ```
 
 **Prototype limitation:** the database currently has no authentication, role-based access, or tamper-resistant audit controls. Do not use real employee records or deploy this feature operationally until access controls, privacy review, retention, and security hardening are implemented.
+
+
+## Analyst authentication and session controls
+- Local analyst login uses PBKDF2 password hashes; account creation is administrator-only in the dashboard.
+- Analysts can change their own password after verifying the current password.
+- Dashboard sessions expire after 15 minutes without a Streamlit rerun and after 8 hours absolute. Expiry is checked when the app reruns (this prototype does not run a background idle timer).
+- These controls are prototype safeguards, not production-grade identity/session management. Use only on a trusted local machine and synthetic/authorized data.
