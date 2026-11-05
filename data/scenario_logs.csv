@@ -1,0 +1,8 @@
+timestamp,employee_id,role,action,resource,details,after_hours,sensitive
+2026-11-01T09:00:00,u1,Analyst,login,workstation,normal start,false,false
+2026-11-01T09:05:00,u1,Analyst,view,report.csv,normal report read,false,false
+2026-11-01T22:00:00,u2,Staff,download,payroll.csv,after-hours download,true,true
+2026-11-01T22:05:00,u2,Staff,export,payroll.csv,export attempt,true,true
+2026-11-01T22:10:00,u2,Staff,share,payroll.csv,external share attempt,true,true
+2026-11-02T10:00:00,u3,HR,view,employee_records,authorized access,false,true
+2026-11-02T10:10:00,u3,HR,download,employee_records,approved task,false,true
