@@ -132,6 +132,26 @@ m1.metric("Open alerts",sum(a["status"]=="Open" for a in alerts))
 m2.metric("High risk alerts",sum(a["risk_level"]=="High" for a in alerts))
 m3.metric("Resolved",sum(a["status"]=="Resolved" for a in alerts))
 m4.metric("False positives",sum(a["status"]=="False Positive" for a in alerts))
+st.subheader("Risk analytics")
+if alerts:
+ analytics_col1,analytics_col2=st.columns(2)
+ with analytics_col1:
+  st.caption("Alerts by risk level")
+  risk_counts=pd.DataFrame({"Risk level":["High","Medium","Low"],
+   "Alerts":[sum(a["risk_level"]==level for a in alerts) for level in ["High","Medium","Low"]]})
+  st.bar_chart(risk_counts.set_index("Risk level"),width="stretch")
+ with analytics_col2:
+  st.caption("Alerts by disposition")
+  disposition_order=["Open","Under Review","Resolved","False Positive"]
+  disposition_counts=pd.DataFrame({"Disposition":disposition_order,
+   "Alerts":[sum(a["status"]==status for a in alerts) for status in disposition_order]})
+  st.bar_chart(disposition_counts.set_index("Disposition"),width="stretch")
+ st.caption("Risk score distribution (0–100)")
+ score_data=pd.DataFrame({"Risk score":[int(a["risk_score"]) for a in alerts]})
+ st.bar_chart(score_data.value_counts().sort_index().rename_axis("Risk score").to_frame("Alert count"),width="stretch")
+else:
+ st.info("Analytics will appear when incidents are generated.")
+
 st.subheader("Incident alert queue")
 st.caption("Scores prioritize review; they do not prove malicious intent.")
 if alerts:
