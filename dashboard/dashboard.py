@@ -7,6 +7,7 @@ from modules.event_correlator import correlate_events
 from modules.context_analyzer import analyze_context
 from modules.risk_engine import score_incident
 from modules.alert_manager import build_alert, set_disposition, priority
+from modules.case_store import create_case, update_case, list_cases, get_case_history
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 st.title("Insider Threat Risk Monitor")
