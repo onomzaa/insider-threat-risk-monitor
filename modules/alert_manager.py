@@ -14,6 +14,7 @@ def build_alert(incident, risk_result, context_results=None):
         "risk_score": score,
         "risk_level": risk_result.get("risk_level", "Low"),
         "reasons": list(risk_result.get("explanation", [])),
+        "risk_factors": list(risk_result.get("factors", [])),
         "context": context_results,
         "status": "Open",
         "created_at": datetime.now(timezone.utc).isoformat(),
