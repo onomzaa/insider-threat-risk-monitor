@@ -42,3 +42,19 @@ for incident in incidents:
 
 ## Responsible use
 Use synthetic or authorized activity logs only. Restrict access to logs, minimize personal data, and require a human analyst to validate alerts. A high score is not proof of malicious intent.
+
+## Alert manager and scenario tests
+- `modules/alert_manager.py` creates review-ready alerts, validates analyst dispositions, and sorts the queue.
+- `tests/test_scenarios.py` includes normal activity, suspicious transfer, and analyst-review checks.
+- `data/scenario_logs.csv` contains clearly synthetic scenario records for demonstration.
+
+Run the tests:
+```powershell
+python -m unittest discover -s tests -v
+```
+If your repository uses pytest, also run:
+```powershell
+python -m pytest -q
+```
+
+The dashboard's review status is stored in Streamlit session state for demonstration; it resets when the app session restarts. It is not a persistent case-management database.
