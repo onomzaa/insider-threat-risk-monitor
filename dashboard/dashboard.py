@@ -118,33 +118,46 @@ if alerts:
         case, created = create_case(selected_alert, actor=analyst["username"])
         st.success(("Created" if created else "Opened existing") + f" case #{case['case_id']}")
 cases = list_cases()
-if cases:
-    labels = {f"Case #{c['case_id']} — {c['alert_id']} ({c['status']})": c for c in cases}
-    label = st.selectbox("Case to investigate", list(labels), key="case_pick")
-    case = labels[label]
-    st.write(f"**Alert:** {case['alert_id']} | **Risk:** {case['risk_score']}/100")
-    with st.form("case_editor"):
-        case_status = st.selectbox("Status", ["Open", "Under Review", "Resolved", "False Positive"],
-            index=["Open", "Under Review", "Resolved", "False Positive"].index(case["status"]))
-        assigned = st.text_input("Assigned analyst", case["assigned_to"])
-        notes = st.text_area("Investigation notes", case["analyst_notes"])
-        submitted = st.form_submit_button("Save case", disabled=not can("review",analyst["role"]))
-    if submitted:
-        update_case(case["case_id"], case_status, assigned, notes, actor=analyst["username"])
-        st.success("Case saved to database.")
-        st.rerun()
-    st.write("**Case history**")
-    history = get_case_history(case["case_id"])
-    st.dataframe(pd.DataFrame(history), width="stretch", hide_index=True)
-    st.download_button("Export history CSV", pd.DataFrame(history).to_csv(index=False).encode(),
-                       f"case_{case['case_id']}_history.csv", "text/csv")
-else:
-    st.info("No investigation cases yet. Create one from an alert.")
 st.subheader("Case register")
 if cases:
-    st.dataframe(pd.DataFrame(cases), width="stretch", hide_index=True)
+    filter_col, search_col = st.columns([1, 2])
+    with filter_col:
+        chosen_status = st.selectbox("Filter by status", ["All statuses", "Open", "Under Review", "Resolved", "False Positive"], key="case_status_filter")
+    with search_col:
+        case_query = st.text_input("Search case ID, alert ID, or analyst", key="case_search").strip().lower()
+    filtered_cases = [
+        item for item in cases
+        if (chosen_status == "All statuses" or item["status"] == chosen_status)
+        and (not case_query or case_query in str(item["case_id"]).lower()
+             or case_query in str(item["alert_id"]).lower()
+             or case_query in str(item["assigned_to"]).lower())
+    ]
+    st.caption(f"Showing {len(filtered_cases)} of {len(cases)} cases")
+    if filtered_cases:
+        st.dataframe(pd.DataFrame(filtered_cases), width="stretch", hide_index=True)
+        labels = {f"Case #{item['case_id']} — {item['alert_id']} ({item['status']})": item for item in filtered_cases}
+        label = st.selectbox("Case to investigate", list(labels), key="case_pick")
+        case = labels[label]
+        st.write(f"**Alert:** {case['alert_id']} | **Risk:** {case['risk_score']}/100")
+        with st.form("case_editor"):
+            case_status = st.selectbox("Status", ["Open", "Under Review", "Resolved", "False Positive"],
+                index=["Open", "Under Review", "Resolved", "False Positive"].index(case["status"]))
+            assigned = st.text_input("Assigned analyst", case["assigned_to"])
+            notes = st.text_area("Investigation notes", case["analyst_notes"])
+            submitted = st.form_submit_button("Save case", disabled=not can("review",analyst["role"]))
+        if submitted:
+            update_case(case["case_id"], case_status, assigned, notes, actor=analyst["username"])
+            st.success("Case saved to database.")
+            st.rerun()
+        st.write("**Case history**")
+        history = get_case_history(case["case_id"])
+        st.dataframe(pd.DataFrame(history), width="stretch", hide_index=True)
+        st.download_button("Export history CSV", pd.DataFrame(history).to_csv(index=False).encode(),
+                           f"case_{case['case_id']}_history.csv", "text/csv")
+    else:
+        st.info("No cases match these filters. Change the status or search term.")
 else:
-    st.caption("The case register is empty.")
+    st.info("No investigation cases yet. Create one from an alert.")
 
 st.subheader("Security audit trail")
 st.caption("Audit events record case creation and changes. Hash-chain verification detects record edits; it is not a substitute for access controls or external backups.")
