@@ -12,6 +12,7 @@ from modules.case_store import create_case, update_case, list_cases, get_case_hi
 from modules.audit_log import list_audit_events, verify_audit_chain
 from modules.auth import authenticate, can, create_user, load_users, change_password
 from modules.alert_review_store import get_review, save_review
+from modules.report_generator import generate_alert_report
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 
@@ -179,6 +180,11 @@ if alerts:
    for event in sorted(employee_events,key=lambda e:e["timestamp"])])
   st.caption("Chronological activity for this employee (synthetic dataset); contextual indicators do not prove wrongdoing.")
   st.dataframe(timeline,width="stretch",hide_index=True)
+  report_timeline=[event for event in records if event["employee_id"]==a["employee_id"]]
+  report_case=next((item for item in list_cases() if item["alert_id"]==selected),None)
+  report_pdf=generate_alert_report(a,report_timeline,report_case,analyst["username"])
+  st.download_button("Download investigation report (PDF)",report_pdf,
+   file_name=f"{selected}_investigation.pdf",mime="application/pdf")
   st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
   if a.get("reviewed_by"):
    st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
