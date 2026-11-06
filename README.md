@@ -196,3 +196,13 @@ python -m evaluation.evaluate
 python scripts/generate_presentation.py
 python -m modules.project_finalization
 ```
+
+## Research evaluation report generator
+
+After running the synthetic evaluation and optional threshold analysis, generate a formal report:
+```powershell
+python -m evaluation.evaluate
+python -m evaluation.threshold_analysis
+python -m evaluation.research_report
+```
+This writes `results/research_evaluation_report.md` and, when ReportLab is installed, `results/research_evaluation_report.pdf`. The report documents synthetic-data scope and limitations; it does not claim real-world effectiveness.
