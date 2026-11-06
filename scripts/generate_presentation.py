@@ -15,11 +15,9 @@ from pptx.enum.shapes import MSO_SHAPE
 
 import csv
 
-METRICS_PATH = ROOT / 'results' / 'evaluation_metrics.csv'
-
-def load_evaluation_summary(path=METRICS_PATH):
+def load_evaluation_summary(path=None):
     """Return factual evaluation rows, or None when metrics are unavailable."""
-    path = Path(path)
+    path = Path(path) if path is not None else ROOT / 'results' / 'evaluation_metrics.csv'
     if not path.exists():
         return None
     with path.open('r', encoding='utf-8-sig', newline='') as handle:
@@ -29,7 +27,7 @@ def load_evaluation_summary(path=METRICS_PATH):
         return None
     return rows
 
-def evaluation_slide_content(path=METRICS_PATH):
+def evaluation_slide_content(path=None):
     """Build evaluation slide content from actual CSV values, never estimates."""
     rows = load_evaluation_summary(path)
     if not rows:
