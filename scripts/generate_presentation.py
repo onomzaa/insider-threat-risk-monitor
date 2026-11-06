@@ -36,7 +36,7 @@ def evaluation_slide_content(path=None):
             'Run: python -m evaluation.evaluate',
             'Regenerate this deck after evaluation',
             'Do not substitute estimated or invented performance values',
-        ], 'No valid evaluation_metrics.csv was available. Run the evaluation command and regenerate the presentation before presenting numeric results.')
+        ], 'Evaluation metrics are not available because no valid evaluation_metrics.csv was found. Run the evaluation command and regenerate the presentation before presenting numeric results.')
     bullets = ['Actual results from results/evaluation_metrics.csv']
     for row in rows[:3]:
         bullets.append(
