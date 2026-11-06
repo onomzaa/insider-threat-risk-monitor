@@ -141,3 +141,15 @@ The Analyst Review panel maps explainable risk factors to prioritized, advisory 
 ## Behavioral anomaly indicators
 
 The analyst review panel includes explainable peer comparisons for repeated role-unusual actions/resources, elevated action shares, and concentrated after-hours activity. Comparisons require a configurable minimum number of same-role peers (default: two). Small synthetic datasets can produce unstable comparisons; findings are review indicators, not evidence of intent or misconduct.
+
+
+## End-to-end pipeline checks
+
+`tests/test_pipeline_integration.py` exercises the synthetic pipeline from event correlation through context analysis, risk scoring, alert creation, filtering, and analyst disposition. It also verifies that events belonging to different fictional employees remain separate incidents.
+
+Run the complete suite after pulling the latest changes:
+```powershell
+python -m unittest discover -s tests -v
+```
+
+Integration tests use fixed fictional events only; they do not connect to an organization's systems or collect employee activity.
