@@ -131,3 +131,8 @@ Analysts can download a PDF from the selected alert's review panel. Reports incl
 Analysts can attach evidence metadata to an alert from the Analyst Review panel: title, description, and a reference to a synthetic or authorized source (for example, a scenario log row). Entries persist in the shared local SQLite database and record analyst attribution and timestamps. Evidence additions are written to the hash-chained audit log.
 
 The register stores references and descriptions only; it does not upload or collect raw files. Use approved, minimized evidence and follow applicable privacy and retention requirements.
+
+
+## Risk mitigation recommendations
+
+The Analyst Review panel maps explainable risk factors to prioritized, advisory review steps (such as validating data movement, checking access changes, confirming after-hours schedules, and reviewing sensitive-resource access). Recommendations do not automatically disable accounts, block activity, or make accusations; analysts must validate context and follow approved organizational procedures.
