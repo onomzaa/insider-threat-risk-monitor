@@ -2,6 +2,8 @@
 import streamlit as st
 import pandas as pd
 import time
+from pathlib import Path
+from modules.evaluation_dashboard import load_evaluation_metrics
 from modules.data_loader import load_activity
 from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
@@ -313,3 +315,22 @@ else:
 
 st.subheader("Baseline alerts"); st.dataframe(baseline,width="stretch")
 st.subheader("Activity log"); st.dataframe(df,width="stretch")
+
+# Detection performance is evaluated against labeled synthetic scenarios only.
+st.subheader("Detection performance evaluation")
+st.caption("These metrics describe the supplied synthetic evaluation dataset, not validated real-world performance.")
+metrics_path = Path(__file__).resolve().parent.parent / "results" / "evaluation_metrics.csv"
+try:
+    metrics = load_evaluation_metrics(metrics_path)
+    if metrics.empty:
+        st.info("No evaluation results yet. In the project terminal, run: python -m evaluation.evaluate")
+    else:
+        st.dataframe(metrics, width="stretch", hide_index=True)
+        chart_metrics = [name for name in ["precision", "recall", "f1", "false_positive_rate"] if name in metrics.columns]
+        if "method" in metrics.columns and chart_metrics:
+            st.caption("Metric comparison by detector (0–1 scale)")
+            st.bar_chart(metrics.set_index("method")[chart_metrics], width="stretch")
+        st.download_button("Download evaluation metrics (CSV)", metrics.to_csv(index=False).encode(),
+                           "evaluation_metrics.csv", "text/csv")
+except (ValueError, OSError) as exc:
+    st.error(f"Could not load evaluation metrics: {exc}")
