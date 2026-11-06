@@ -326,7 +326,7 @@ try:
         st.info("No evaluation results yet. In the project terminal, run: python -m evaluation.evaluate")
     else:
         st.dataframe(metrics, width="stretch", hide_index=True)
-        chart_metrics = [name for name in ["precision", "recall", "f1", "false_positive_rate"] if name in metrics.columns]
+        chart_metrics = [name for name in ["precision", "recall", "F1", "false_positive_rate"] if name in metrics.columns]
         if "method" in metrics.columns and chart_metrics:
             st.caption("Metric comparison by detector (0–1 scale)")
             st.bar_chart(metrics.set_index("method")[chart_metrics], width="stretch")
