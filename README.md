@@ -175,3 +175,5 @@ Tests: `python -m unittest discover -s tests -v` (includes `tests/test_demo_scen
 - [Demonstration and defense guide](docs/DEMONSTRATION_AND_DEFENSE_GUIDE.md) — objectives, demo steps, evaluation interpretation, ethical safeguards, slide outline, and sample defense questions.
 
 These documents describe the educational prototype and its synthetic-data scope; they do not claim real-world detection effectiveness.
+
+- [Presentation slide script](docs/PRESENTATION_SLIDE_SCRIPT.md) — complete 12-slide draft, speaker cues, evaluation/ethics guidance, and defense Q&A.
