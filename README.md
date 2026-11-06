@@ -206,3 +206,17 @@ python -m evaluation.threshold_analysis
 python -m evaluation.research_report
 ```
 This writes `results/research_evaluation_report.md` and, when ReportLab is installed, `results/research_evaluation_report.pdf`. The report documents synthetic-data scope and limitations; it does not claim real-world effectiveness.
+
+
+## Safe submission bundle
+
+Create a ZIP containing an explicit allowlist of project source, tests, documentation, evaluation outputs, and the generated presentation:
+```powershell
+python -m modules.submission_bundle
+```
+Output: `dist/ITRM_Submission_Bundle.zip`. The ZIP includes `SUBMISSION_MANIFEST.json` with file hashes and a list of allowlisted files not present. The builder excludes local analyst credentials, SQLite case data, audit logs, environment secrets, virtual environments, caches, and Git metadata. Review the manifest and contents before submitting; use synthetic/demo data only.
+
+Test the bundle safeguards:
+```powershell
+python -m unittest tests.test_submission_bundle -v
+```
