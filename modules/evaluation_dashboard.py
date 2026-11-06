@@ -3,8 +3,8 @@ from pathlib import Path
 import pandas as pd
 
 REQUIRED_COLUMNS = {
-    "method", "precision", "recall", "f1", "false_positive_rate",
-    "true_positive", "false_positive", "true_negative", "false_negative",
+    "method", "precision", "recall", "F1", "false_positive_rate",
+    "TP", "FP", "TN", "FN",
 }
 
 
