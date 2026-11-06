@@ -214,7 +214,7 @@ Create a ZIP containing an explicit allowlist of project source, tests, document
 ```powershell
 python -m modules.submission_bundle
 ```
-Output: `dist/ITRM_Submission_Bundle.zip`. The ZIP includes `SUBMISSION_MANIFEST.json` with file hashes and a list of allowlisted files not present. The builder excludes local analyst credentials, SQLite case data, audit logs, environment secrets, virtual environments, caches, and Git metadata. Review the manifest and contents before submitting; use synthetic/demo data only.
+Output: `dist/ITRM_Submission_Bundle.zip`. The ZIP includes `SUBMISSION_MANIFEST.json` with SHA-256 hashes and a list of allowlisted files not present. The allowlist includes the final academic report, viva question bank, final validation summaries, evaluation artifacts, and generated presentation when available. The builder excludes local analyst credentials, SQLite case data, audit logs, environment secrets, virtual environments, caches, Git metadata, and symlinked files that could point outside the project. Review the manifest and contents before submitting; use synthetic/demo data only.
 
 Test the bundle safeguards:
 ```powershell
