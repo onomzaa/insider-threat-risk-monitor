@@ -177,3 +177,12 @@ Tests: `python -m unittest discover -s tests -v` (includes `tests/test_demo_scen
 These documents describe the educational prototype and its synthetic-data scope; they do not claim real-world detection effectiveness.
 
 - [Presentation slide script](docs/PRESENTATION_SLIDE_SCRIPT.md) — complete 12-slide draft, speaker cues, evaluation/ethics guidance, and defense Q&A.
+
+## PowerPoint presentation generator
+
+Generate an editable 12-slide project deck locally with speaker notes:
+```powershell
+python -m pip install python-pptx
+python scripts/generate_presentation.py
+```
+Output: `presentation/Insider_Threat_Risk_Monitor.pptx`. See [presentation instructions](presentation/README.md).
