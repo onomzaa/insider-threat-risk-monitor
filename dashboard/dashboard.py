@@ -281,6 +281,40 @@ if alerts:
  with f3: alert_query=st.text_input("Search Alert ID or employee",key="alert_search")
  filtered_alerts=filter_alerts(alerts,risk_filter,status_filter,alert_query)
  st.caption(f"Showing {len(filtered_alerts)} of {len(alerts)} alerts")
+
+ # Visual triage cards: fast scanning, clear status, and an explicit human-review action.
+ st.markdown("""
+ <style>
+ .itrm-alert-card{background:#fff;border:1px solid #d5e2ee;border-left:6px solid #64748b;
+ border-radius:15px;padding:16px 18px;margin:8px 0;box-shadow:0 4px 14px rgba(16,42,67,.055)}
+ .itrm-alert-card.high{border-left-color:#b91c1c}
+ .itrm-alert-card.medium{border-left-color:#b45309}
+ .itrm-alert-card.low{border-left-color:#0f766e}
+ .itrm-card-kicker{font-size:12px;font-weight:750;letter-spacing:.08em;color:#475569;text-transform:uppercase}
+ .itrm-card-id{font-size:19px;font-weight:800;color:#102a43;overflow-wrap:anywhere}
+ .itrm-card-meta{color:#334155;font-size:14px;line-height:1.6}
+ .itrm-card-score{font-size:27px;font-weight:850;color:#102a43}
+ </style>
+ """,unsafe_allow_html=True)
+ st.markdown("### 🧭 Visual triage")
+ st.caption("Scan severity and context, then open an alert for evidence-led review. A score is a prioritization signal—not a finding.")
+ card_cols=st.columns(2)
+ for card_index,card_alert in enumerate(filtered_alerts):
+  with card_cols[card_index%2]:
+   level=str(card_alert.get("risk_level","Low")).lower()
+   score=max(0,min(100,int(card_alert.get("risk_score",0))))
+   st.markdown(
+    f'<div class="itrm-alert-card {level}">'
+    f'<div class="itrm-card-kicker">{level.title()} priority • {card_alert.get("status","Open")}</div>'
+    f'<div class="itrm-card-id">{card_alert["alert_id"]}</div>'
+    f'<div class="itrm-card-meta">Employee: <strong>{card_alert["employee_id"]}</strong> &nbsp;•&nbsp; Events: {card_alert["event_count"]}</div>'
+    f'<div class="itrm-card-score">{score}<span style="font-size:13px;font-weight:600"> / 100</span></div>'
+    f'<div class="itrm-card-meta">{(" • ".join(card_alert.get("reasons",[])[:2])) or "No reason summary available"}</div>'
+    f'</div>',unsafe_allow_html=True)
+   st.progress(score/100,text=f"Risk score indicator: {score}/100")
+   if st.button("Inspect alert →",key="inspect_"+str(card_alert["alert_id"]),use_container_width=True):
+    st.session_state["visual_selected_alert"]=card_alert["alert_id"]
+    st.rerun()
  table=pd.DataFrame([{"Alert ID":a["alert_id"],"Employee":a["employee_id"],"Events":a["event_count"],
  "Score":a["risk_score"],"Level":a["risk_level"],"Status":a["status"],"Reasons":"; ".join(a["reasons"])} for a in filtered_alerts])
  st.dataframe(table,width="stretch",hide_index=True)
