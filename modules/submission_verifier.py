@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
+import stat
 import zipfile
 from pathlib import Path, PurePosixPath
 
@@ -11,27 +13,35 @@ FORBIDDEN_NAMES = {
     "analysts.json", "cases.db", "audit.log", "audit.jsonl",
     ".env", "secrets.json", "credentials.json",
 }
-FORBIDDEN_PARTS = {".git", ".venv", "venv", "__pycache__", ".pytest_cache", "node_modules"}
+FORBIDDEN_PARTS = {
+    ".git", ".venv", "venv", "__pycache__", ".pytest_cache",
+    "node_modules", "dist", "build",
+}
+MANIFEST_NAME = "SUBMISSION_MANIFEST.json"
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def _safe_archive_path(name: str) -> bool:
+    """Reject absolute paths, traversal, Windows paths, and private runtime files."""
+    if not name or "\\\\" in name or name.startswith("/"):
+        return False
     path = PurePosixPath(name)
-    return (
-        bool(name)
-        and not path.is_absolute()
-        and ".." not in path.parts
-        and not any(part in FORBIDDEN_PARTS for part in path.parts)
-        and path.name not in FORBIDDEN_NAMES
-        and not path.name.startswith(".env")
-    )
+    if path.is_absolute() or ".." in path.parts:
+        return False
+    if path.parts and ":" in path.parts[0]:
+        return False
+    if any(part in FORBIDDEN_PARTS for part in path.parts):
+        return False
+    if any(part in FORBIDDEN_NAMES or part.startswith(".env") for part in path.parts):
+        return False
+    return True
 
 
 def verify_submission_bundle(bundle_path: Path) -> dict:
-    """Return a machine-readable integrity and safety verification report."""
+    """Return an integrity and packaging-safety report; never extract archive files."""
     bundle_path = Path(bundle_path)
     issues: list[str] = []
     checked_files = 0
-    manifest = None
 
     if not bundle_path.is_file():
         return {
@@ -43,68 +53,82 @@ def verify_submission_bundle(bundle_path: Path) -> dict:
 
     try:
         with zipfile.ZipFile(bundle_path, "r") as archive:
+            infos = archive.infolist()
+            names = [info.filename for info in infos]
+            if len(names) != len(set(names)):
+                issues.append("Archive contains duplicate member names.")
+
+            for info in infos:
+                name = info.filename
+                if name != MANIFEST_NAME and not _safe_archive_path(name):
+                    issues.append(f"Unsafe or prohibited archive path: {name}")
+                mode = info.external_attr >> 16
+                if stat.S_ISLNK(mode):
+                    issues.append(f"Archive contains a symlink entry: {name}")
+
             bad_member = archive.testzip()
             if bad_member:
                 issues.append(f"ZIP CRC check failed for: {bad_member}")
 
-            names = archive.namelist()
-            if len(names) != len(set(names)):
-                issues.append("Archive contains duplicate member names.")
-
-            for name in names:
-                if not _safe_archive_path(name):
-                    issues.append(f"Unsafe or prohibited archive path: {name}")
-
-            if "SUBMISSION_MANIFEST.json" not in names:
-                issues.append("SUBMISSION_MANIFEST.json is missing.")
+            if MANIFEST_NAME not in names:
+                issues.append(f"{MANIFEST_NAME} is missing.")
+                manifest = None
             else:
                 try:
-                    manifest = json.loads(archive.read("SUBMISSION_MANIFEST.json"))
+                    manifest = json.loads(archive.read(MANIFEST_NAME).decode("utf-8"))
                 except (UnicodeDecodeError, json.JSONDecodeError):
-                    issues.append("Submission manifest is not valid JSON.")
+                    manifest = None
+                    issues.append("Submission manifest is not valid UTF-8 JSON.")
 
-            if isinstance(manifest, dict):
-                entries = manifest.get("included_files")
-                if not isinstance(entries, list):
-                    issues.append("Manifest included_files must be a list.")
-                    entries = []
+            if manifest is not None:
+                if not isinstance(manifest, dict):
+                    issues.append("Submission manifest must contain a JSON object.")
+                else:
+                    entries = manifest.get("included_files")
+                    if not isinstance(entries, list):
+                        issues.append("Manifest included_files must be a list.")
+                        entries = []
 
-                declared: set[str] = set()
-                for entry in entries:
-                    if not isinstance(entry, dict):
-                        issues.append("Manifest contains a malformed file entry.")
-                        continue
-                    name = entry.get("path")
-                    expected_hash = entry.get("sha256")
-                    expected_size = entry.get("size_bytes")
-                    if not isinstance(name, str) or not _safe_archive_path(name):
-                        issues.append(f"Manifest contains an unsafe path: {name!r}")
-                        continue
-                    if name in declared:
-                        issues.append(f"Manifest contains a duplicate path: {name}")
-                        continue
-                    declared.add(name)
-                    if name not in names:
-                        issues.append(f"Manifest file is missing from ZIP: {name}")
-                        continue
-                    payload = archive.read(name)
-                    checked_files += 1
-                    actual_hash = hashlib.sha256(payload).hexdigest()
-                    if actual_hash != expected_hash:
-                        issues.append(f"SHA-256 mismatch: {name}")
-                    if len(payload) != expected_size:
-                        issues.append(f"File size mismatch: {name}")
+                    declared: set[str] = set()
+                    for entry in entries:
+                        if not isinstance(entry, dict):
+                            issues.append("Manifest contains a malformed file entry.")
+                            continue
+                        name = entry.get("path")
+                        expected_hash = entry.get("sha256")
+                        expected_size = entry.get("size_bytes")
+                        if not isinstance(name, str) or not _safe_archive_path(name):
+                            issues.append(f"Manifest contains an unsafe path: {name!r}")
+                            continue
+                        if name in declared:
+                            issues.append(f"Manifest contains a duplicate path: {name}")
+                            continue
+                        declared.add(name)
+                        if not isinstance(expected_hash, str) or not _SHA256_RE.fullmatch(expected_hash):
+                            issues.append(f"Manifest has an invalid SHA-256 value: {name}")
+                            continue
+                        if isinstance(expected_size, bool) or not isinstance(expected_size, int) or expected_size < 0:
+                            issues.append(f"Manifest has an invalid file size: {name}")
+                            continue
+                        if name not in names:
+                            issues.append(f"Manifest file is missing from ZIP: {name}")
+                            continue
 
-                actual_files = set(names) - {"SUBMISSION_MANIFEST.json"}
-                unlisted = actual_files - declared
-                missing = declared - actual_files
-                if unlisted:
-                    issues.append("ZIP contains files absent from manifest: " + ", ".join(sorted(unlisted)))
-                if missing:
-                    issues.append("Manifest lists files absent from ZIP: " + ", ".join(sorted(missing)))
-            elif manifest is not None:
-                issues.append("Submission manifest must contain a JSON object.")
-    except (zipfile.BadZipFile, OSError) as exc:
+                        payload = archive.read(name)
+                        checked_files += 1
+                        if hashlib.sha256(payload).hexdigest() != expected_hash:
+                            issues.append(f"SHA-256 mismatch: {name}")
+                        if len(payload) != expected_size:
+                            issues.append(f"File size mismatch: {name}")
+
+                    actual_files = set(names) - {MANIFEST_NAME}
+                    unlisted = actual_files - declared
+                    missing = declared - actual_files
+                    if unlisted:
+                        issues.append("ZIP contains files absent from manifest: " + ", ".join(sorted(unlisted)))
+                    if missing:
+                        issues.append("Manifest lists files absent from ZIP: " + ", ".join(sorted(missing)))
+    except (zipfile.BadZipFile, OSError, RuntimeError) as exc:
         issues.append(f"Unable to read submission ZIP: {exc}")
 
     return {
@@ -129,7 +153,12 @@ def write_verification_report(report: dict, json_path: Path, markdown_path: Path
         "## Findings",
     ]
     lines.extend([f"- {issue}" for issue in report["issues"]] or ["- No integrity or packaging issues found."])
-    markdown_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    lines.extend([
+        "",
+        "A PASS confirms package integrity and basic packaging safeguards only; it does not certify project security or research validity.",
+        "",
+    ])
+    markdown_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
