@@ -255,3 +255,15 @@ python -m unittest tests.test_final_validation -v
 ```
 
 The authenticated dashboard also has **Final system validation • Integration tests** → **Run full system validation**. This runs the same test suite locally and displays its output. Reports are saved to `results/final_validation.json` and `results/final_validation.md`. A PASS means the discovered automated tests passed—not that the prototype is production-secure or validated on real organizational data.
+
+
+## Final academic research report
+
+Generate a structured report draft from the actual evaluation files (without inventing metrics):
+```powershell
+python -m evaluation.evaluate
+python -m evaluation.threshold_analysis
+python -m modules.final_research_document
+python -m unittest tests.test_final_research_document -v
+```
+Output: `docs/FINAL_RESEARCH_REPORT.md`. If evaluation metrics are missing, the report explicitly says so. Replace the administrative placeholders, verify reference editions/details, and critically discuss results before submission. The evaluation uses synthetic, hand-labeled scenarios only.
