@@ -15,7 +15,7 @@ class EvaluationDashboardTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "metrics.csv"
             pd.DataFrame([{
-                "method": "baseline", "precision": .8, "recall": .7, "f1": .75,
+                "method": "baseline", "precision": .8, "recall": .7, "F1": .75,
                 "false_positive_rate": .1, "true_positive": 7, "false_positive": 2,
                 "true_negative": 18, "false_negative": 3,
             }]).to_csv(path, index=False)
