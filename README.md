@@ -136,3 +136,8 @@ The register stores references and descriptions only; it does not upload or coll
 ## Risk mitigation recommendations
 
 The Analyst Review panel maps explainable risk factors to prioritized, advisory review steps (such as validating data movement, checking access changes, confirming after-hours schedules, and reviewing sensitive-resource access). Recommendations do not automatically disable accounts, block activity, or make accusations; analysts must validate context and follow approved organizational procedures.
+
+
+## Behavioral anomaly indicators
+
+The analyst review panel includes explainable peer comparisons for repeated role-unusual actions/resources, elevated action shares, and concentrated after-hours activity. Comparisons require a configurable minimum number of same-role peers (default: two). Small synthetic datasets can produce unstable comparisons; findings are review indicators, not evidence of intent or misconduct.
