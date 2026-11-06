@@ -6,6 +6,7 @@ from pathlib import Path
 from modules.evaluation_dashboard import load_evaluation_metrics
 from modules.scenario_generator import generate_activity
 from modules.config_store import load_config, save_config
+from modules.system_health import check_system_health
 from modules.data_loader import load_activity
 from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
@@ -130,6 +131,27 @@ with st.expander("System configuration • Detection settings"):
   except ValueError as exc:
    st.error(str(exc))
  st.write("Current configuration:",config)
+
+# Read-only project readiness checks for demonstration preparation.
+with st.expander("System health • Project readiness"):
+ st.caption("Availability checks only—not a production security certification.")
+ health_rows=check_system_health(Path(__file__).resolve().parent.parent)
+ try:
+  audit_health=verify_audit_chain()
+  health_rows.append({"Component":"Audit hash chain",
+   "Status":"Ready" if audit_health["valid"] else "Attention",
+   "Details":f"{audit_health['checked']} entries checked — {audit_health['reason']}"})
+ except Exception as exc:
+  health_rows.append({"Component":"Audit hash chain","Status":"Attention",
+   "Details":"Could not verify: "+str(exc)})
+ health_frame=pd.DataFrame(health_rows)
+ st.dataframe(health_frame,width="stretch",hide_index=True)
+ ready_count=sum(row["Status"]=="Ready" for row in health_rows)
+ st.metric("Readiness checks",f"{ready_count}/{len(health_rows)} ready")
+ if any(row["Status"]=="Attention" for row in health_rows):
+  st.warning("Review Attention items above before your project demonstration.")
+ else:
+  st.success("All current availability checks passed. This is not production approval.")
 
 df=load_activity(); baseline=detect_baseline(df)
 records=[]
