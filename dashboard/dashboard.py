@@ -431,3 +431,28 @@ with st.expander("Configure and generate synthetic rows"):
         st.download_button("Download generated activity CSV",
             generated_frame.to_csv(index=False).encode("utf-8"),
             "synthetic_activity.csv", "text/csv")
+
+
+# Read-only final quality audit; it scans project files but never executes project code.
+st.subheader("Final audit • Quality assurance")
+st.caption("Static readiness and Python syntax checks only. Run the full test suite separately; this is not a security certification.")
+if st.button("Run final quality audit"):
+    from modules.quality_audit import audit_project
+    audit = audit_project()
+    st.session_state["quality_audit_result"] = audit
+if "quality_audit_result" in st.session_state:
+    audit = st.session_state["quality_audit_result"]
+    q1, q2, q3 = st.columns(3)
+    q1.metric("Passed checks", f"{audit['passed']}/{audit['total']}")
+    q2.metric("Needs attention", audit["attention"])
+    q3.metric("Failures", audit["failed"])
+    for item in audit["checks"]:
+        with st.expander(f"{item['status']} — {item['category']}"):
+            if item["missing"]:
+                st.write(item["missing"])
+            else:
+                st.write(f"Verified {item['required']} item(s).")
+    st.info("Audit result: " + ("All static checks passed." if audit["ready"] else "Review CHECK/FAIL items above."))
+    st.download_button("Download audit results (JSON)",
+        __import__("json").dumps(audit, indent=2).encode("utf-8"),
+        "itrm_quality_audit.json", "application/json")
