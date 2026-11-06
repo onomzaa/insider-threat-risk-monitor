@@ -267,3 +267,14 @@ python -m modules.final_research_document
 python -m unittest tests.test_final_research_document -v
 ```
 Output: `docs/FINAL_RESEARCH_REPORT.md`. If evaluation metrics are missing, the report explicitly says so. Replace the administrative placeholders, verify reference editions/details, and critically discuss results before submission. The evaluation uses synthetic, hand-labeled scenarios only.
+
+## Presentation evaluation integration
+The PowerPoint generator now reads `results/evaluation_metrics.csv` when building slide 9. It inserts the actual precision, recall, F1, false-positive rate, and confusion-matrix counts for each available method. If the metrics file is missing or has an unexpected schema, the slide explicitly instructs the presenter to run the evaluation instead of showing invented figures.
+
+Regenerate after evaluation:
+```powershell
+python -m evaluation.evaluate
+python scripts/generate_presentation.py
+python -m unittest tests.test_presentation_evaluation -v
+```
+Review the generated slide and speaker notes before presenting. Results remain limited to the hand-labeled synthetic scenarios.
