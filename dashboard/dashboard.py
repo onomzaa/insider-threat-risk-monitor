@@ -24,7 +24,23 @@ from modules.evidence_store import add_evidence, list_evidence
 from modules.mitigation_recommendations import recommend_mitigations
 from modules.behavioral_detector import detect_behavioral_anomalies
 
-st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
+st.set_page_config(page_title="ITRM • Security Operations", page_icon="🛡️", layout="wide")
+st.markdown("""
+<style>
+ .stApp{background:linear-gradient(135deg,#f3f7fb,#eaf2f8,#f8fafc)}
+ .block-container{max-width:1500px;padding-top:1.4rem;padding-bottom:3rem}
+ [data-testid="stMetric"]{background:#fff;border:1px solid #d7e2ee;padding:1rem;border-radius:16px;box-shadow:0 5px 18px rgba(23,45,74,.06)}
+ [data-testid="stMetricLabel"]{color:#334155!important;font-weight:650!important}
+ [data-testid="stMetricValue"]{color:#102a43!important}
+ .stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button{border-radius:10px;min-height:44px;font-weight:650}
+ input,textarea,[role="combobox"]{min-height:42px}
+ :focus-visible{outline:3px solid #f59e0b!important;outline-offset:3px!important}
+ h1,h2,h3{color:#102a43;letter-spacing:-.025em}
+ div[role="alert"]{border-radius:12px}
+ @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+ @media(prefers-contrast:more){[data-testid="stMetric"]{border:2px solid #102a43}}
+</style>
+""",unsafe_allow_html=True)
 
 # Login gate: no dashboard data or review controls are shown before authentication.
 if "analyst_account" not in st.session_state:
@@ -61,7 +77,13 @@ if idle_expired or absolute_expired:
 st.session_state.last_activity_at = now
 
 analyst = st.session_state.analyst_account
-st.title("Insider Threat Risk Monitor")
+st.markdown("""
+<div style="background:linear-gradient(120deg,#102a43,#164e63 58%,#0f766e);padding:26px 30px;border-radius:22px;color:white;margin-bottom:18px;">
+<div style="font-size:13px;font-weight:700;letter-spacing:.12em;">🛡️ SECURITY OPERATIONS • ITRM</div>
+<div style="font-size:clamp(26px,3vw,38px);font-weight:800;line-height:1.15;margin:9px 0;">See the signal. Understand the story.</div>
+<div style="font-size:15px;max-width:760px;line-height:1.55;">A human-led workspace to review unusual activity, connect context, and document decisions—not automate accusations.</div>
+</div>
+""",unsafe_allow_html=True)
 st.caption(f"Signed in: {analyst['username']} • Role: {analyst['role']} • Research prototype; alerts require human review")
 if st.button("Sign out"):
     st.session_state.analyst_account = None
