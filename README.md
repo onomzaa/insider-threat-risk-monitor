@@ -278,3 +278,14 @@ python scripts/generate_presentation.py
 python -m unittest tests.test_presentation_evaluation -v
 ```
 Review the generated slide and speaker notes before presenting. Results remain limited to the hand-labeled synthetic scenarios.
+
+
+## Submission bundle integrity verification
+
+After creating the safe ZIP, verify its manifest, file hashes and sizes, ZIP CRC, archive paths, and that every packaged file is declared in the manifest:
+```powershell
+python -m modules.submission_bundle
+python -m modules.submission_verifier
+python -m unittest tests.test_submission_verifier -v
+```
+The verifier writes `results/submission_verification.json` and `results/submission_verification.md`. It exits with a non-zero status if verification fails. Review both the bundle and verification report before sharing; a PASS confirms package integrity and basic packaging safeguards, not project security or research validity.
