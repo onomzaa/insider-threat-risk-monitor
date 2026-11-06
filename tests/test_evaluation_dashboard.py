@@ -16,8 +16,8 @@ class EvaluationDashboardTests(unittest.TestCase):
             path = Path(directory) / "metrics.csv"
             pd.DataFrame([{
                 "method": "baseline", "precision": .8, "recall": .7, "F1": .75,
-                "false_positive_rate": .1, "true_positive": 7, "false_positive": 2,
-                "true_negative": 18, "false_negative": 3,
+                "false_positive_rate": .1, "TP": 7, "FP": 2,
+                "TN": 18, "FN": 3,
             }]).to_csv(path, index=False)
             self.assertEqual(load_evaluation_metrics(path).iloc[0]["method"], "baseline")
 
