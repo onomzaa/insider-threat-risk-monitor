@@ -186,3 +186,13 @@ python -m pip install python-pptx
 python scripts/generate_presentation.py
 ```
 Output: `presentation/Insider_Threat_Risk_Monitor.pptx`. See [presentation instructions](presentation/README.md).
+
+## Project finalization checklist
+
+After sign-in, open **Project finalization • Submission readiness**. It checks required project files and optional presentation/PDF dependencies. It is a read-only presence check—not a quality or test certification. Also run:
+```powershell
+python -m unittest discover -s tests -v
+python -m evaluation.evaluate
+python scripts/generate_presentation.py
+python -m modules.project_finalization
+```
