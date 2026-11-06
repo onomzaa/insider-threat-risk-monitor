@@ -167,3 +167,11 @@ The panel is useful before a class demonstration. Generate evaluation metrics wi
 After signing in, expand **Project demonstration • Guided synthetic scenario** and click **Run guided demonstration**. The walkthrough displays a fixed fictional sequence, correlation, context checks, explainable risk score, and analyst validation step. The demonstration alert is illustrative and is not written to the persistent case register. No real employee activity is collected.
 
 Tests: `python -m unittest discover -s tests -v` (includes `tests/test_demo_scenario.py`).
+
+
+## Presentation and project defense
+
+- [System architecture](docs/ARCHITECTURE.md) — module flow, trust boundaries, and prototype limitations.
+- [Demonstration and defense guide](docs/DEMONSTRATION_AND_DEFENSE_GUIDE.md) — objectives, demo steps, evaluation interpretation, ethical safeguards, slide outline, and sample defense questions.
+
+These documents describe the educational prototype and its synthetic-data scope; they do not claim real-world detection effectiveness.
