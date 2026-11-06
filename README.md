@@ -160,3 +160,10 @@ Integration tests use fixed fictional events only; they do not connect to an org
 The authenticated dashboard includes a **System health • Project readiness** panel. It checks the activity dataset, local configuration, case database availability, synthetic evaluation output, ReportLab dependency, core module files, and audit-chain verification. These are read-only availability/integrity checks—not a production security certification.
 
 The panel is useful before a class demonstration. Generate evaluation metrics with `python -m evaluation.evaluate`; install PDF support with `python -m pip install reportlab` if the PDF dependency check reports Attention.
+
+
+## Guided project demonstration
+
+After signing in, expand **Project demonstration • Guided synthetic scenario** and click **Run guided demonstration**. The walkthrough displays a fixed fictional sequence, correlation, context checks, explainable risk score, and analyst validation step. The demonstration alert is illustrative and is not written to the persistent case register. No real employee activity is collected.
+
+Tests: `python -m unittest discover -s tests -v` (includes `tests/test_demo_scenario.py`).
