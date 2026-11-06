@@ -14,6 +14,7 @@ from modules.auth import authenticate, can, create_user, load_users, change_pass
 from modules.alert_review_store import get_review, save_review
 from modules.report_generator import generate_alert_report
 from modules.evidence_store import add_evidence, list_evidence
+from modules.mitigation_recommendations import recommend_mitigations
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 
@@ -208,6 +209,12 @@ if alerts:
   st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
   if a.get("reviewed_by"):
    st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
+  st.subheader("Risk mitigation recommendations")
+  st.caption("Advisory checks only; validate context before taking action.")
+  for recommendation in recommend_mitigations(a):
+   st.markdown("**"+recommendation["priority"]+" priority — "+recommendation["title"]+"**")
+   st.write(recommendation["rationale"])
+   st.write(recommendation["steps"])
   st.write("**Why this score?**")
   if a.get("risk_factors"):
    st.dataframe(pd.DataFrame(a["risk_factors"]),width="stretch",hide_index=True)
