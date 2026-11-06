@@ -13,6 +13,7 @@ from modules.audit_log import list_audit_events, verify_audit_chain
 from modules.auth import authenticate, can, create_user, load_users, change_password
 from modules.alert_review_store import get_review, save_review
 from modules.report_generator import generate_alert_report
+from modules.evidence_store import add_evidence, list_evidence
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 
@@ -185,6 +186,25 @@ if alerts:
   report_pdf=generate_alert_report(a,report_timeline,report_case,analyst["username"])
   st.download_button("Download investigation report (PDF)",report_pdf,
    file_name=f"{selected}_investigation.pdf",mime="application/pdf")
+  st.subheader("Incident evidence")
+  st.caption("Record references to synthetic or authorized evidence. Do not upload sensitive raw files.")
+  with st.form("evidence_form_"+selected):
+   evidence_title=st.text_input("Evidence title",placeholder="Example: Synthetic access log excerpt")
+   evidence_description=st.text_area("Description",placeholder="What this reference supports or shows")
+   evidence_reference=st.text_input("Evidence reference",placeholder="Example: scenario_logs.csv row 12")
+   evidence_submitted=st.form_submit_button("Add evidence reference",disabled=not can("review",analyst["role"]))
+  if evidence_submitted:
+   try:
+    added=add_evidence(selected,evidence_title,evidence_description,evidence_reference,analyst["username"])
+    st.success("Evidence reference added: E"+str(added["evidence_id"]))
+    st.rerun()
+   except ValueError as exc:
+    st.error(str(exc))
+  evidence_records=list_evidence(selected)
+  if evidence_records:
+   st.dataframe(pd.DataFrame(evidence_records),width="stretch",hide_index=True)
+  else:
+   st.info("No evidence references recorded for this alert yet.")
   st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
   if a.get("reviewed_by"):
    st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
