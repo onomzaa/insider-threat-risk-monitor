@@ -3,7 +3,7 @@
 Scores prioritize analyst review; they are not proof of malicious intent.
 Action and context factors are capped/combined to avoid double-counting.
 """
-def score_incident(events, context_results=None):
+def score_incident(events, context_results=None, high_threshold=70, medium_threshold=40):
     context_results = context_results or []
     factors = []
     actions = [str(e.get("action", "")).strip().lower() for e in events]
@@ -35,7 +35,7 @@ def score_incident(events, context_results=None):
 
     raw_score = sum(item["points"] for item in factors)
     score = min(100, raw_score)
-    level = "High" if score >= 70 else "Medium" if score >= 40 else "Low"
+    level = "High" if score >= high_threshold else "Medium" if score >= medium_threshold else "Low"
     explanation = [f"{item['factor']} (+{item['points']})" for item in factors]
     if score != raw_score:
         explanation.append(f"Score capped at 100 (raw total: {raw_score})")
