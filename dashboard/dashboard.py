@@ -320,7 +320,12 @@ if alerts:
  st.dataframe(table,width="stretch",hide_index=True)
  st.download_button("Export filtered alerts (CSV)",table.to_csv(index=False).encode(),"alert_queue.csv","text/csv")
  if filtered_alerts:
-  st.subheader("🧑‍⚖️ Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in filtered_alerts])
+  st.subheader("🧑‍⚖️ Analyst review")
+  alert_options=[a["alert_id"] for a in filtered_alerts]
+  preferred_alert=st.session_state.get("visual_selected_alert")
+  selected_index=alert_options.index(preferred_alert) if preferred_alert in alert_options else 0
+  selected=st.selectbox("Select alert to investigate",alert_options,index=selected_index,key="analyst_alert_selector")
+  st.session_state["visual_selected_alert"]=selected
   a=next(x for x in filtered_alerts if x["alert_id"]==selected)
   st.subheader("Behavioral anomaly indicators")
   employee_anomalies=[item for item in behavioral_anomalies if item["employee_id"]==a["employee_id"]]
