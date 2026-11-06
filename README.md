@@ -124,3 +124,10 @@ The analyst review panel displays a chronological activity timeline for the sele
 ## PDF investigation reports
 
 Analysts can download a PDF from the selected alert's review panel. Reports include alert identity and score, disposition/reviewer details, risk explanations, analyst and case notes, and a chronological activity table. Reports are generated locally from synthetic or authorized records and remain subject to human review.
+
+
+## Incident evidence register
+
+Analysts can attach evidence metadata to an alert from the Analyst Review panel: title, description, and a reference to a synthetic or authorized source (for example, a scenario log row). Entries persist in the shared local SQLite database and record analyst attribution and timestamps. Evidence additions are written to the hash-chained audit log.
+
+The register stores references and descriptions only; it does not upload or collect raw files. Use approved, minimized evidence and follow applicable privacy and retention requirements.
