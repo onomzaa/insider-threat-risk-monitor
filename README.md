@@ -220,3 +220,15 @@ Test the bundle safeguards:
 ```powershell
 python -m unittest tests.test_submission_bundle -v
 ```
+
+
+## Final quality audit
+
+Run the read-only project inventory and Python syntax scan from PowerShell:
+```powershell
+python -m modules.quality_audit
+python -m unittest tests.test_quality_audit -v
+python -m unittest discover -s tests -v
+```
+
+After signing in, the dashboard's **Final audit • Quality assurance** panel can run the same checks and export a JSON summary. It checks required files, parses Python source for syntax errors, and checks evaluation artifacts. It does not execute tests, inspect runtime behavior, or certify security; run the complete test suite separately.
