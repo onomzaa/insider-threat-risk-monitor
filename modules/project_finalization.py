@@ -14,9 +14,17 @@ CHECKS = [
     ("Presentation script", ["docs/PRESENTATION_SLIDE_SCRIPT.md"]),
     ("PowerPoint generator", ["scripts/generate_presentation.py"]),
     ("Synthetic demo", ["modules/demo_scenario.py", "tests/test_demo_scenario.py"]),
+    ("Final academic report", ["modules/final_research_document.py", "tests/test_final_research_document.py"]),
+    ("Viva preparation", ["modules/viva_assistant.py", "tests/test_viva_assistant.py"]),
+    ("Final system validation", ["modules/final_validation.py", "tests/test_final_validation.py"]),
+    ("Submission bundle builder", ["modules/submission_bundle.py", "tests/test_submission_bundle.py"]),
+    ("Submission integrity verifier", ["modules/submission_verifier.py", "tests/test_submission_verifier.py"]),
 ]
 
+
 def assess_project(root=ROOT):
+    """Check required project artifacts without executing project code."""
+    root = Path(root)
     results = []
     for label, paths in CHECKS:
         missing = [p for p in paths if not (root / p).exists()]
@@ -28,10 +36,14 @@ def assess_project(root=ROOT):
     pptx_path = root / "presentation" / "Insider_Threat_Risk_Monitor.pptx"
     results.append({"item": "Generated PowerPoint", "ready": pptx_path.exists(),
                     "missing": [] if pptx_path.exists() else ["presentation/Insider_Threat_Risk_Monitor.pptx"]})
-    return {"checks": results, "dependencies": deps,
-            "ready_count": sum(r["ready"] for r in results),
-            "total_count": len(results),
-            "ready": all(r["ready"] for r in results)}
+    return {
+        "checks": results,
+        "dependencies": deps,
+        "ready_count": sum(r["ready"] for r in results),
+        "total_count": len(results),
+        "ready": all(r["ready"] for r in results),
+    }
+
 
 def main():
     report = assess_project()
@@ -48,6 +60,7 @@ def main():
     print(f"\nFiles present: {report['ready_count']}/{report['total_count']}")
     print("Assessment: " + ("FILE CHECKS COMPLETE" if report["ready"] else "ACTION REQUIRED"))
     print("Note: This checks file presence only; run tests and review outputs separately.")
+
 
 if __name__ == "__main__":
     main()
