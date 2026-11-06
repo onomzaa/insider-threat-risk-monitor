@@ -27,40 +27,33 @@ from modules.behavioral_detector import detect_behavioral_anomalies
 st.set_page_config(page_title="ITRM • Security Operations", page_icon="🛡️", layout="wide")
 st.markdown("""
 <style>
- /* Calm, low-glare slate canvas with subtle depth; avoid bright white wash. */
- .stApp{background:#111827!important;background-image:radial-gradient(ellipse at 12% 0%,rgba(45,78,105,.28),transparent 42%),radial-gradient(ellipse at 88% 18%,rgba(25,95,91,.16),transparent 38%)!important;color:#e5e7eb}
- [data-testid="stMain"]{background:transparent}
- .block-container{background:transparent}
- /* Panels use soft charcoal surfaces, not glaring white cards. */
- [data-testid="stMetric"]{background:#1f2937!important;border:1px solid #374151!important;box-shadow:0 8px 24px rgba(0,0,0,.16)!important}
- [data-testid="stMetricLabel"]{color:#cbd5e1!important}
- [data-testid="stMetricValue"]{color:#f8fafc!important}
- h1,h2,h3{color:#f1f5f9!important}
- p,li,label,[data-testid="stCaptionContainer"]{color:#d1d5db}
- .stMarkdown,.stText{color:#e5e7eb}
- [data-testid="stSidebar"]{background:#0b1220!important;border-right:1px solid #273449}
- [data-testid="stSidebar"] *{color:#e2e8f0}
- .stTextInput input,.stTextArea textarea,[role="combobox"],.stSelectbox div[data-baseweb="select"]{background:#111827!important;color:#f1f5f9!important;border-color:#4b5563!important}
- .stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button{background:#263548!important;color:#f8fafc!important;border:1px solid #475569!important}
- .stButton>button:hover,.stDownloadButton>button:hover{background:#33465e!important;border-color:#64748b!important}
- .itrm-alert-card{background:#1f2937!important;border-color:#374151!important}
- .itrm-card-id,.itrm-card-score{color:#f8fafc!important}
- .itrm-card-meta{color:#cbd5e1!important}
- .itrm-card-kicker{color:#cbd5e1!important}
- .stDataFrame,[data-testid="stDataFrame"]{background:#1f2937}
- .stProgress>div>div{background:#14b8a6!important}
-
- .block-container{max-width:1500px;padding-top:1.4rem;padding-bottom:3rem}
- [data-testid="stMetric"]{background:#fff;border:1px solid #d7e2ee;padding:1rem;border-radius:16px;box-shadow:0 5px 18px rgba(23,45,74,.06)}
- [data-testid="stMetricLabel"]{color:#334155!important;font-weight:650!important}
- [data-testid="stMetricValue"]{color:#102a43!important}
- .stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button{border-radius:10px;min-height:44px;font-weight:650}
- input,textarea,[role="combobox"]{min-height:42px}
- :focus-visible{outline:3px solid #f59e0b!important;outline-offset:3px!important}
- h1,h2,h3{color:#102a43;letter-spacing:-.025em}
- div[role="alert"]{border-radius:12px}
- @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
- @media(prefers-contrast:more){[data-testid="stMetric"]{border:2px solid #102a43}}
+:root{--bg:#101923;--panel:#192633;--panel2:#203241;--line:#304454;--text:#e8eef4;--muted:#a9bac9;--teal:#55c4b2;--blue:#7da9df;--amber:#e7b66a}
+.stApp{background:radial-gradient(ellipse at 12% 0%,rgba(62,110,143,.20),transparent 38%),radial-gradient(ellipse at 90% 12%,rgba(47,137,126,.13),transparent 34%),#101923!important;color:var(--text)}
+[data-testid="stMain"],.block-container{background:transparent}
+.block-container{max-width:1580px;padding-top:1.6rem;padding-bottom:3rem}
+[data-testid="stSidebar"]{background:linear-gradient(180deg,#101a25,#0d151e)!important;border-right:1px solid #263847}
+[data-testid="stSidebar"] *{color:#dce7ef}
+h1,h2,h3{color:#f1f6fa!important;letter-spacing:-.025em}
+p,li,label,[data-testid="stCaptionContainer"]{color:#c4d2de}
+.stMarkdown,.stText{color:var(--text)}
+[data-testid="stMetric"]{background:linear-gradient(145deg,#203140,#192633)!important;border:1px solid #344a5b!important;border-radius:16px!important;padding:1rem 1.1rem!important;box-shadow:0 8px 22px rgba(0,0,0,.12)!important;transition:transform .16s ease,border-color .16s ease}
+[data-testid="stMetric"]:hover{transform:translateY(-2px);border-color:#52758a!important}
+[data-testid="stMetricLabel"]{color:#b8cad8!important;font-weight:650!important}
+[data-testid="stMetricValue"]{color:#f4f8fb!important}
+.stTextInput input,.stTextArea textarea,[role="combobox"],.stSelectbox div[data-baseweb="select"]{background:#14212c!important;color:#edf4f8!important;border-color:#405668!important;border-radius:10px!important}
+.stButton>button,.stDownloadButton>button,[data-testid="stFormSubmitButton"] button{background:#263b4d!important;color:#f4f8fb!important;border:1px solid #456176!important;border-radius:10px;min-height:44px;font-weight:650;transition:all .15s ease}
+.stButton>button:hover,.stDownloadButton>button:hover{background:#304b60!important;border-color:#6b91a9!important;transform:translateY(-1px)}
+input,textarea,[role="combobox"]{min-height:42px}
+:focus-visible{outline:3px solid #e7b66a!important;outline-offset:3px!important}
+div[role="alert"]{border-radius:12px}
+[data-testid="stDataFrame"]{border:1px solid #304454;border-radius:12px;overflow:hidden}
+.stProgress>div>div{background:var(--teal)!important}
+.itrm-alert-card{background:linear-gradient(145deg,#203140,#192633)!important;border:1px solid #344a5b!important;border-radius:16px;padding:18px;margin:10px 0;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.itrm-card-id,.itrm-card-score{color:#f3f8fb!important}
+.itrm-card-meta{color:#c1d0dc!important}
+.itrm-card-kicker{color:#b6c9d8!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(prefers-contrast:more){[data-testid="stMetric"]{border:2px solid #8ba9bc!important}}
 </style>
 """,unsafe_allow_html=True)
 
