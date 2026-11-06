@@ -232,3 +232,15 @@ python -m unittest discover -s tests -v
 ```
 
 After signing in, the dashboard's **Final audit • Quality assurance** panel can run the same checks and export a JSON summary. It checks required files, parses Python source for syntax errors, and checks evaluation artifacts. It does not execute tests, inspect runtime behavior, or certify security; run the complete test suite separately.
+
+
+## Viva / project defense preparation
+
+After sign-in, open **Project defense • Viva preparation**, choose how many questions to display, and click **Prepare viva questions**. Review the questions and answer guides, then download the Markdown study guide. The reviewed question bank covers motivation, objectives, architecture, detection, explainability, evaluation metrics, false positives, limitations, ethics, synthetic data, and future work.
+
+Generate the guide from PowerShell as well:
+```powershell
+python -m modules.viva_assistant
+python -m unittest tests.test_viva_assistant -v
+```
+This writes `docs/VIVA_QUESTION_BANK.md`. Use the answer guides as prompts, add your actual contributions and evaluation results, and explain the material in your own words.
