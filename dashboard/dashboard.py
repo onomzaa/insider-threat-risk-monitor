@@ -93,7 +93,7 @@ st.session_state.last_activity_at = now
 
 analyst = st.session_state.analyst_account
 st.markdown("""
-<div style="background:linear-gradient(120deg,#102a43,#164e63 58%,#0f766e);padding:26px 30px;border-radius:22px;color:white;margin-bottom:18px;">
+<div style="background:radial-gradient(circle at 86% 20%,rgba(104,190,184,.22),transparent 24%),linear-gradient(120deg,#172b3c,#21485a 62%,#1b625e);padding:30px 34px;border:1px solid rgba(139,190,201,.22);border-radius:24px;color:white;margin-bottom:20px;box-shadow:0 14px 34px rgba(0,0,0,.16);position:relative;overflow:hidden;">
 <div style="font-size:13px;font-weight:700;letter-spacing:.12em;">🛡️ SECURITY OPERATIONS • ITRM</div>
 <div style="font-size:clamp(26px,3vw,38px);font-weight:800;line-height:1.15;margin:9px 0;">See the signal. Understand the story.</div>
 <div style="font-size:15px;max-width:760px;line-height:1.55;">A human-led workspace to review unusual activity, connect context, and document decisions—not automate accusations.</div>
@@ -300,15 +300,15 @@ if alerts:
  # Visual triage cards: fast scanning, clear status, and an explicit human-review action.
  st.markdown("""
  <style>
- .itrm-alert-card{background:#fff;border:1px solid #d5e2ee;border-left:6px solid #64748b;
- border-radius:15px;padding:16px 18px;margin:8px 0;box-shadow:0 4px 14px rgba(16,42,67,.055)}
- .itrm-alert-card.high{border-left-color:#b91c1c}
- .itrm-alert-card.medium{border-left-color:#b45309}
- .itrm-alert-card.low{border-left-color:#0f766e}
- .itrm-card-kicker{font-size:12px;font-weight:750;letter-spacing:.08em;color:#475569;text-transform:uppercase}
- .itrm-card-id{font-size:19px;font-weight:800;color:#102a43;overflow-wrap:anywhere}
- .itrm-card-meta{color:#334155;font-size:14px;line-height:1.6}
- .itrm-card-score{font-size:27px;font-weight:850;color:#102a43}
+ .itrm-alert-card{background:linear-gradient(145deg,#203140,#192633)!important;border:1px solid #344a5b;border-left:5px solid #668196;
+ border-radius:16px;padding:18px;margin:10px 0;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+ .itrm-alert-card.high{border-left-color:#e07878}
+ .itrm-alert-card.medium{border-left-color:#e7b66a}
+ .itrm-alert-card.low{border-left-color:#55c4b2}
+ .itrm-card-kicker{font-size:12px;font-weight:750;letter-spacing:.08em;color:#b6c9d8;text-transform:uppercase}
+ .itrm-card-id{font-size:19px;font-weight:800;color:#f3f8fb;overflow-wrap:anywhere}
+ .itrm-card-meta{color:#c1d0dc;font-size:14px;line-height:1.65}
+ .itrm-card-score{font-size:27px;font-weight:850;color:#f3f8fb}
  </style>
  """,unsafe_allow_html=True)
  st.markdown("### 🧭 Visual triage")
