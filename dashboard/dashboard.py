@@ -4,6 +4,7 @@ import pandas as pd
 import time
 from pathlib import Path
 from modules.evaluation_dashboard import load_evaluation_metrics
+from modules.scenario_generator import generate_activity
 from modules.data_loader import load_activity
 from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
@@ -334,3 +335,24 @@ try:
                            "evaluation_metrics.csv", "text/csv")
 except (ValueError, OSError) as exc:
     st.error(f"Could not load evaluation metrics: {exc}")
+
+# Synthetic activity generator: no real user or organization data is used.
+st.subheader("Synthetic activity generator")
+st.caption("Generate fictional activity rows for local testing. This does not monitor real people or systems.")
+with st.expander("Configure and generate synthetic rows"):
+    generated_count = st.number_input("Number of synthetic events", min_value=1, max_value=10000, value=100, step=25)
+    generated_seed = st.number_input("Random seed (repeatable)", min_value=0, max_value=2147483647, value=42, step=1)
+    if st.button("Generate synthetic activity"):
+        try:
+            generated_rows = generate_activity(int(generated_count), seed=int(generated_seed))
+            generated_frame = pd.DataFrame(generated_rows)
+            st.session_state["synthetic_activity_preview"] = generated_frame
+            st.success(f"Generated {len(generated_frame)} fictional activity rows.")
+        except ValueError as exc:
+            st.error(str(exc))
+    if "synthetic_activity_preview" in st.session_state:
+        generated_frame = st.session_state["synthetic_activity_preview"]
+        st.dataframe(generated_frame.head(100), width="stretch", hide_index=True)
+        st.download_button("Download generated activity CSV",
+            generated_frame.to_csv(index=False).encode("utf-8"),
+            "synthetic_activity.csv", "text/csv")
