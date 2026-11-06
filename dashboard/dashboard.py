@@ -249,7 +249,7 @@ m1.metric("Open alerts",sum(a["status"]=="Open" for a in alerts))
 m2.metric("High risk alerts",sum(a["risk_level"]=="High" for a in alerts))
 m3.metric("Resolved",sum(a["status"]=="Resolved" for a in alerts))
 m4.metric("False positives",sum(a["status"]=="False Positive" for a in alerts))
-st.subheader("Risk analytics")
+st.subheader("📊 Risk analytics")
 if alerts:
  analytics_col1,analytics_col2=st.columns(2)
  with analytics_col1:
@@ -272,7 +272,7 @@ if alerts:
 else:
  st.info("Analytics will appear when incidents are generated.")
 
-st.subheader("Incident alert queue")
+st.subheader("🚨 Incident alert queue")
 st.caption("Scores prioritize review; they do not prove malicious intent.")
 if alerts:
  f1,f2,f3=st.columns([1,1,2])
@@ -286,7 +286,7 @@ if alerts:
  st.dataframe(table,width="stretch",hide_index=True)
  st.download_button("Export filtered alerts (CSV)",table.to_csv(index=False).encode(),"alert_queue.csv","text/csv")
  if filtered_alerts:
-  st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in filtered_alerts])
+  st.subheader("🧑‍⚖️ Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in filtered_alerts])
   a=next(x for x in filtered_alerts if x["alert_id"]==selected)
   st.subheader("Behavioral anomaly indicators")
   employee_anomalies=[item for item in behavioral_anomalies if item["employee_id"]==a["employee_id"]]
@@ -295,7 +295,7 @@ if alerts:
    st.dataframe(pd.DataFrame(employee_anomalies),width="stretch",hide_index=True)
   else:
    st.info("No configured behavioral deviations found for this employee.")
-  st.subheader("Incident timeline")
+  st.subheader("🕒 Incident timeline")
   employee_events=[event for event in records if event["employee_id"]==a["employee_id"]]
   timeline=pd.DataFrame([{"Timestamp":event["timestamp"],"Action":event["action"],
    "Resource":event["resource"],"After hours":event["after_hours"],
@@ -308,7 +308,7 @@ if alerts:
   report_pdf=generate_alert_report(a,report_timeline,report_case,analyst["username"])
   st.download_button("Download investigation report (PDF)",report_pdf,
    file_name=f"{selected}_investigation.pdf",mime="application/pdf")
-  st.subheader("Incident evidence")
+  st.subheader("📎 Incident evidence")
   st.caption("Record references to synthetic or authorized evidence. Do not upload sensitive raw files.")
   with st.form("evidence_form_"+selected):
    evidence_title=st.text_input("Evidence title",placeholder="Example: Synthetic access log excerpt")
@@ -330,7 +330,7 @@ if alerts:
   st.write(f"**Employee:** {a['employee_id']} | **Risk:** {a['risk_score']}/100 ({a['risk_level']})")
   if a.get("reviewed_by"):
    st.caption(f"Last reviewed by {a['reviewed_by']} • {a.get('reviewed_at', 'timestamp unavailable')}")
-  st.subheader("Risk mitigation recommendations")
+  st.subheader("🧩 Risk mitigation recommendations")
   st.caption("Advisory checks only; validate context before taking action.")
   for recommendation in recommend_mitigations(a):
    st.markdown("**"+recommendation["priority"]+" priority — "+recommendation["title"]+"**")
@@ -354,7 +354,7 @@ if alerts:
   st.info("No alerts match these filters. Adjust risk, disposition, or search.")
 else:
  st.info("No incidents were generated.")
-st.subheader("Persistent investigation cases")
+st.subheader("🗂️ Persistent investigation cases")
 st.caption("SQLite-backed cases persist after dashboard restarts. Review permissions are role-controlled.")
 if alerts:
     alert_id = st.selectbox("Alert to create a case from", [a["alert_id"] for a in alerts], key="case_alert")
@@ -404,7 +404,7 @@ if cases:
 else:
     st.info("No investigation cases yet. Create one from an alert.")
 
-st.subheader("Security audit trail")
+st.subheader("🔐 Security audit trail")
 st.caption("Audit events record case creation and changes. Hash-chain verification detects record edits; it is not a substitute for access controls or external backups.")
 audit_col1, audit_col2 = st.columns([1, 3])
 with audit_col1:
@@ -427,7 +427,7 @@ st.subheader("Baseline alerts"); st.dataframe(baseline,width="stretch")
 st.subheader("Activity log"); st.dataframe(df,width="stretch")
 
 # Detection performance is evaluated against labeled synthetic scenarios only.
-st.subheader("Detection performance evaluation")
+st.subheader("🎯 Detection performance evaluation")
 st.caption("These metrics describe the supplied synthetic evaluation dataset, not validated real-world performance.")
 metrics_path = Path(__file__).resolve().parent.parent / "results" / "evaluation_metrics.csv"
 try:
