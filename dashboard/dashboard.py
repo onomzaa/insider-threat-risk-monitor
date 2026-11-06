@@ -615,3 +615,55 @@ if "final_validation_result" in st.session_state:
         __import__("json").dumps(validation,indent=2).encode("utf-8"),
         "final_validation.json","application/json")
     st.caption("Saved reports: results/final_validation.json and results/final_validation.md")
+
+# === LAST-LOADED VISUAL OVERRIDES (kept at EOF to win the CSS cascade) ===
+st.markdown("""
+<style>
+/* Make the refreshed theme clearly visible while keeping contrast calm. */
+.stApp {
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(57,128,173,.24), transparent 34%),
+    radial-gradient(ellipse at 92% 8%, rgba(48,164,145,.17), transparent 30%),
+    #0e1721 !important;
+}
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg,#142331 0%,#0c141d 100%) !important;
+  border-right: 1px solid #355064 !important;
+}
+.block-container { max-width: 1600px !important; padding-top: 2rem !important; }
+h1 { font-size: 2.15rem !important; font-weight: 760 !important; }
+h2 { font-size: 1.55rem !important; font-weight: 700 !important; }
+h3 { font-size: 1.18rem !important; font-weight: 680 !important; }
+[data-testid="stMetric"] {
+  background: linear-gradient(135deg,#263f52 0%,#1a2b3a 100%) !important;
+  border: 1px solid #45657b !important;
+  border-radius: 17px !important;
+  padding: 1.15rem 1.2rem !important;
+  box-shadow: 0 9px 24px rgba(0,0,0,.20) !important;
+}
+[data-testid="stMetricLabel"] { color:#c3d7e6 !important; }
+[data-testid="stMetricValue"] { color:#f6fbff !important; }
+[data-testid="stMetricDelta"] { font-weight:650 !important; }
+[data-testid="stTabs"] button[role="tab"] { padding: .65rem 1rem !important; }
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+  color:#73d7c7 !important; border-bottom-color:#55c4b2 !important;
+}
+.stButton>button, .stDownloadButton>button {
+  background:linear-gradient(135deg,#2b4b62,#234255) !important;
+  border:1px solid #54758a !important; border-radius:11px !important;
+  box-shadow:0 3px 10px rgba(0,0,0,.12) !important;
+}
+.stButton>button:hover, .stDownloadButton>button:hover {
+  background:linear-gradient(135deg,#365e78,#2a5667) !important;
+  border-color:#79a8bd !important;
+}
+[data-testid="stDataFrame"], [data-testid="stTable"] {
+  border:1px solid #3a5366 !important; border-radius:13px !important;
+}
+hr { border-color:#30495b !important; }
+.itrm-alert-card {
+  background:linear-gradient(135deg,#243b4d,#182836) !important;
+  border-color:#456176 !important; border-radius:17px !important;
+}
+</style>
+""", unsafe_allow_html=True)
