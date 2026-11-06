@@ -341,6 +341,13 @@ if alerts:
    "Sensitive resource":event["sensitive"],"Details":event["details"]}
    for event in sorted(employee_events,key=lambda e:e["timestamp"])])
   st.caption("Chronological activity for this employee (synthetic dataset); contextual indicators do not prove wrongdoing.")
+  # Compact investigation overview helps analysts orient before reading raw rows.
+  tl1,tl2,tl3,tl4=st.columns(4)
+  tl1.metric("Timeline events",len(employee_events))
+  tl2.metric("After-hours",sum(bool(event.get("after_hours")) for event in employee_events))
+  tl3.metric("Sensitive-resource flags",sum(bool(event.get("sensitive")) for event in employee_events))
+  tl4.metric("Behavioral indicators",len(employee_anomalies))
+  st.markdown("#### 🧾 Event sequence")
   st.dataframe(timeline,width="stretch",hide_index=True)
   report_timeline=[event for event in records if event["employee_id"]==a["employee_id"]]
   report_case=next((item for item in list_cases() if item["alert_id"]==selected),None)
