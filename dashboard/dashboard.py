@@ -456,3 +456,23 @@ if "quality_audit_result" in st.session_state:
     st.download_button("Download audit results (JSON)",
         __import__("json").dumps(audit, indent=2).encode("utf-8"),
         "itrm_quality_audit.json", "application/json")
+
+
+# Project viva preparation: reviewed question bank with concise answer guidance.
+st.subheader("Project defense • Viva preparation")
+st.caption("Use these as study prompts. Explain in your own words and insert actual project/test evidence; do not memorize unsupported claims.")
+with st.expander("Generate and review viva questions"):
+    viva_count = st.slider("Questions to display", min_value=4, max_value=12, value=12, key="viva_count")
+    if st.button("Prepare viva questions", key="prepare_viva"):
+        from modules.viva_assistant import generate_questions
+        st.session_state["viva_questions"] = generate_questions(limit=viva_count)
+    if "viva_questions" in st.session_state:
+        viva_items = st.session_state["viva_questions"]
+        for index, item in enumerate(viva_items, 1):
+            with st.expander(f"{index}. {item['category']}"):
+                st.markdown("**Question:** " + item["question"])
+                st.markdown("**Answer guide:** " + item["answer"])
+        from modules.viva_assistant import render_markdown
+        st.download_button("Download viva study guide (Markdown)",
+            render_markdown(viva_items).encode("utf-8"),
+            "ITRM_Viva_Study_Guide.md", "text/markdown")
