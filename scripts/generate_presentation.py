@@ -13,6 +13,45 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 
+import csv
+
+METRICS_PATH = ROOT / 'results' / 'evaluation_metrics.csv'
+
+def load_evaluation_summary(path=METRICS_PATH):
+    """Return factual evaluation rows, or None when metrics are unavailable."""
+    path = Path(path)
+    if not path.exists():
+        return None
+    with path.open('r', encoding='utf-8-sig', newline='') as handle:
+        rows = list(csv.DictReader(handle))
+    required = {'method', 'TP', 'FP', 'TN', 'FN', 'precision', 'recall', 'F1', 'false_positive_rate'}
+    if not rows or not required.issubset(rows[0].keys()):
+        return None
+    return rows
+
+def evaluation_slide_content(path=METRICS_PATH):
+    """Build evaluation slide content from actual CSV values, never estimates."""
+    rows = load_evaluation_summary(path)
+    if not rows:
+        return ([
+            'Evaluation metrics not generated yet',
+            'Run: python -m evaluation.evaluate',
+            'Regenerate this deck after evaluation',
+            'Do not substitute estimated or invented performance values',
+        ], 'No valid evaluation_metrics.csv was available. Run the evaluation command and regenerate the presentation before presenting numeric results.')
+    bullets = ['Actual results from results/evaluation_metrics.csv']
+    for row in rows[:3]:
+        bullets.append(
+            f"{row['method']}: Precision {float(row['precision']):.3f} | "
+            f"Recall {float(row['recall']):.3f} | F1 {float(row['F1']):.3f} | "
+            f"FPR {float(row['false_positive_rate']):.3f}"
+        )
+    bullets.append('Small hand-labeled synthetic dataset; exploratory only')
+    notes = 'Metrics are read directly from the local evaluation CSV. ' + ' '.join(
+        f"{r['method']}: TP={r['TP']}, FP={r['FP']}, TN={r['TN']}, FN={r['FN']}." for r in rows[:3]
+    ) + ' These values describe agreement with synthetic scenario labels, not real-world detection performance.'
+    return bullets, notes
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "presentation" / "Insider_Threat_Risk_Monitor.pptx"
 NAVY = RGBColor(15, 32, 58)
@@ -63,6 +102,8 @@ def main():
     prs.slide_height = Inches(7.5)
     blank = prs.slide_layouts[6]
     for idx, (title, bullets, notes) in enumerate(slides, 1):
+        if title == 'Evaluation':
+            bullets, notes = evaluation_slide_content()
         s = prs.slides.add_slide(blank)
         bg = s.background.fill
         bg.solid()
