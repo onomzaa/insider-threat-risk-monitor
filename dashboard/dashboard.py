@@ -15,6 +15,7 @@ from modules.alert_review_store import get_review, save_review
 from modules.report_generator import generate_alert_report
 from modules.evidence_store import add_evidence, list_evidence
 from modules.mitigation_recommendations import recommend_mitigations
+from modules.behavioral_detector import detect_behavioral_anomalies
 
 st.set_page_config(page_title="Insider Threat Risk Monitor", layout="wide")
 
@@ -115,7 +116,7 @@ profiles={"emp01":{"role":"analyst","allowed_resources":["workstation","report.c
  "emp02":{"role":"hr","allowed_resources":["workstation","employee_records"]},
  "emp03":{"role":"finance","allowed_resources":["workstation","payroll.csv"]},
  "emp04":{"role":"it","allowed_resources":["workstation","admin_access"]}}
-incidents=correlate_events(records,window_minutes=60); alerts=[]
+behavioral_anomalies=detect_behavioral_anomalies(records,min_peer_count=2)\nincidents=correlate_events(records,window_minutes=60); alerts=[]
 for inc in incidents:
  contexts=[analyze_context(e,profiles) for e in inc["events"]]
  alerts.append(build_alert(inc,score_incident(inc["events"],contexts),contexts))
@@ -174,7 +175,7 @@ if alerts:
  if filtered_alerts:
   st.subheader("Analyst review"); selected=st.selectbox("Select alert",[a["alert_id"] for a in filtered_alerts])
   a=next(x for x in filtered_alerts if x["alert_id"]==selected)
-  st.subheader("Incident timeline")
+  st.subheader("Behavioral anomaly indicators")\n  employee_anomalies=[item for item in behavioral_anomalies if item["employee_id"]==a["employee_id"]]\n  st.caption("Peer comparisons use the supplied dataset and same-role records; small samples can be misleading.")\n  if employee_anomalies:\n   st.dataframe(pd.DataFrame(employee_anomalies),width="stretch",hide_index=True)\n  else:\n   st.info("No configured behavioral deviations found for this employee.")\n  st.subheader("Incident timeline")
   employee_events=[event for event in records if event["employee_id"]==a["employee_id"]]
   timeline=pd.DataFrame([{"Timestamp":event["timestamp"],"Action":event["action"],
    "Resource":event["resource"],"After hours":event["after_hours"],
