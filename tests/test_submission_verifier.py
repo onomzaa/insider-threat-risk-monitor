@@ -53,6 +53,33 @@ class SubmissionVerifierTests(unittest.TestCase):
             self.assertTrue(any("prohibited" in issue.lower() or "manifest" in issue.lower()
                                 for issue in report["issues"]))
 
+    def test_traversal_and_windows_paths_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bundle = Path(temp) / "bundle.zip"
+            with zipfile.ZipFile(bundle, "w") as archive:
+                archive.writestr("../outside.txt", b"x")
+                archive.writestr("C:/private.txt", b"x")
+                archive.writestr("SUBMISSION_MANIFEST.json", json.dumps({"included_files": []}))
+            report = verify_submission_bundle(bundle)
+            self.assertEqual(report["status"], "FAIL")
+            self.assertTrue(any("unsafe" in issue.lower() for issue in report["issues"]))
+
+    def test_malformed_manifest_entry_fails_cleanly(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bundle = Path(temp) / "bundle.zip"
+            with zipfile.ZipFile(bundle, "w") as archive:
+                archive.writestr("docs/example.md", b"x")
+                archive.writestr("SUBMISSION_MANIFEST.json", json.dumps({
+                    "included_files": [{
+                        "path": "docs/example.md",
+                        "size_bytes": "one",
+                        "sha256": "not-a-hash",
+                    }]
+                }))
+            report = verify_submission_bundle(bundle)
+            self.assertEqual(report["status"], "FAIL")
+            self.assertTrue(any("invalid" in issue.lower() for issue in report["issues"]))
+
     def test_missing_bundle_fails_cleanly(self):
         with tempfile.TemporaryDirectory() as temp:
             report = verify_submission_bundle(Path(temp) / "missing.zip")
