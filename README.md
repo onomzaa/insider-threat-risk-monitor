@@ -244,3 +244,14 @@ python -m modules.viva_assistant
 python -m unittest tests.test_viva_assistant -v
 ```
 This writes `docs/VIVA_QUESTION_BANK.md`. Use the answer guides as prompts, add your actual contributions and evaluation results, and explain the material in your own words.
+
+
+## Final system validation
+
+Run the complete unittest suite and save timestamped output as JSON and Markdown:
+```powershell
+python -m modules.final_validation
+python -m unittest tests.test_final_validation -v
+```
+
+The authenticated dashboard also has **Final system validation • Integration tests** → **Run full system validation**. This runs the same test suite locally and displays its output. Reports are saved to `results/final_validation.json` and `results/final_validation.md`. A PASS means the discovered automated tests passed—not that the prototype is production-secure or validated on real organizational data.
