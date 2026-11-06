@@ -21,6 +21,10 @@ ALLOWED_FILES = {
     "docs/ARCHITECTURE.md",
     "docs/DEFENSE_GUIDE.md",
     "docs/PRESENTATION_SLIDE_SCRIPT.md",
+    "docs/FINAL_RESEARCH_REPORT.md",
+    "docs/VIVA_QUESTION_BANK.md",
+    "results/final_validation.json",
+    "results/final_validation.md",
     "results/research_evaluation_report.md",
     "results/evaluation_metrics.csv",
     "results/scenario_predictions.csv",
@@ -63,6 +67,13 @@ def approved_paths(root: Path) -> list[Path]:
             candidates.update(p for p in base.rglob("*") if p.is_file())
     safe = []
     for p in candidates:
+        # Do not package symlinks: a link inside the repository could point outside it.
+        if p.is_symlink():
+            continue
+        try:
+            p.resolve().relative_to(root)
+        except ValueError:
+            continue
         rel = p.relative_to(root)
         if is_safe_relative(rel) and not any(part.startswith(".") for part in rel.parts):
             safe.append(p)
