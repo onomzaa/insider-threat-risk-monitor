@@ -85,6 +85,18 @@ st.markdown("""
 </div>
 """,unsafe_allow_html=True)
 st.caption(f"Signed in: {analyst['username']} • Role: {analyst['role']} • Research prototype; alerts require human review")
+
+with st.sidebar:
+ st.markdown("## ♿ Display & access")
+ font_choice=st.radio("Text size",["Standard","Large","Extra large"],index=0,horizontal=False,key="itrm_font")
+ contrast_choice=st.toggle("High contrast",value=False,key="itrm_contrast")
+ st.caption("Keyboard: Tab to move • Enter/Space to activate • Esc to close menus")
+ st.markdown("---")
+ st.markdown("### 🧑‍💻 Analyst workspace")
+ st.caption("Persona focus: triage quickly, inspect evidence, record a justified human decision.")
+font_scale={"Standard":"16px","Large":"18px","Extra large":"20px"}[font_choice]
+contrast_css="body{filter:contrast(1.12)} [data-testid=stMetric]{border:2px solid #102a43!important}" if contrast_choice else ""
+st.markdown(f"<style>html,body,[class*='css']{{font-size:{font_scale}}}{contrast_css}</style>",unsafe_allow_html=True)
 if st.button("Sign out"):
     st.session_state.analyst_account = None
     st.session_state.pop("session_started_at", None)
