@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from modules.evaluation_dashboard import load_evaluation_metrics
 from modules.scenario_generator import generate_activity
+from modules.config_store import load_config, save_config
 from modules.data_loader import load_activity
 from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
@@ -107,6 +108,29 @@ if can("manage_users", analyst["role"]):
                 {"Username": name, "Role": record.get("role", "unknown")}
                 for name, record in sorted(users.items())
             ]), width="stretch", hide_index=True)
+# System settings are persisted locally and applied to subsequent dashboard calculations.
+try:
+ config=load_config()
+except ValueError as exc:
+ st.error(str(exc))
+ st.stop()
+with st.expander("System configuration • Detection settings"):
+ st.caption("Local prototype settings. Changes affect future dashboard calculations.")
+ with st.form("system_config_form"):
+  config_window=st.number_input("Event correlation window (minutes)",min_value=5,max_value=240,value=config["correlation_window_minutes"],step=5)
+  config_medium=st.number_input("Medium-risk score threshold",min_value=10,max_value=99,value=config["medium_risk_threshold"],step=5)
+  config_high=st.number_input("High-risk score threshold",min_value=50,max_value=100,value=config["high_risk_threshold"],step=5)
+  config_submit=st.form_submit_button("Save system settings")
+ if config_submit:
+  proposed={"correlation_window_minutes":int(config_window),"medium_risk_threshold":int(config_medium),"high_risk_threshold":int(config_high)}
+  try:
+   save_config(proposed)
+   st.success("Settings saved. Refreshing dashboard calculations.")
+   st.rerun()
+  except ValueError as exc:
+   st.error(str(exc))
+ st.write("Current configuration:",config)
+
 df=load_activity(); baseline=detect_baseline(df)
 records=[]
 for row in df.to_dict(orient="records"):
@@ -120,10 +144,10 @@ profiles={"emp01":{"role":"analyst","allowed_resources":["workstation","report.c
  "emp03":{"role":"finance","allowed_resources":["workstation","payroll.csv"]},
  "emp04":{"role":"it","allowed_resources":["workstation","admin_access"]}}
 behavioral_anomalies=detect_behavioral_anomalies(records,min_peer_count=2)
-incidents=correlate_events(records,window_minutes=60); alerts=[]
+incidents=correlate_events(records,window_minutes=config["correlation_window_minutes"]); alerts=[]
 for inc in incidents:
  contexts=[analyze_context(e,profiles) for e in inc["events"]]
- alerts.append(build_alert(inc,score_incident(inc["events"],contexts),contexts))
+ alerts.append(build_alert(inc,score_incident(inc["events"],contexts,high_threshold=config["high_risk_threshold"],medium_threshold=config["medium_risk_threshold"]),contexts))
 alerts.sort(key=priority)
 for a in alerts:
  persisted_review = get_review(a["alert_id"])
