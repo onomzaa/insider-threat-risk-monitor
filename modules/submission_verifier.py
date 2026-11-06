@@ -23,7 +23,7 @@ _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 def _safe_archive_path(name: str) -> bool:
     """Reject absolute paths, traversal, Windows paths, and private runtime files."""
-    if not name or "\\\\" in name or name.startswith("/"):
+    if not name or "\\" in name or name.startswith("/"):
         return False
     path = PurePosixPath(name)
     if path.is_absolute() or ".." in path.parts:
