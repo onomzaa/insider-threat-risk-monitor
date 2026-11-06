@@ -25,6 +25,26 @@ from modules.mitigation_recommendations import recommend_mitigations
 from modules.behavioral_detector import detect_behavioral_anomalies
 
 st.set_page_config(page_title="ITRM • Security Operations", page_icon="🛡️", layout="wide")
+# A final theme layer is placed after the original CSS to override Streamlit defaults reliably.
+st.markdown("""
+<style>
+html,body,[data-testid="stAppViewContainer"],.stApp{background-color:#101923!important;color:#e8eef4!important}
+[data-testid="stHeader"]{background:rgba(16,25,35,.82)!important}
+[data-testid="stMain"]{background:transparent!important}
+[data-testid="stSidebar"]{background:#0d151e!important}
+[data-testid="stSidebar"] *{color:#dce7ef!important}
+[data-testid="stMetric"]{background:#203140!important;border:1px solid #405667!important;border-radius:16px!important;box-shadow:0 8px 22px rgba(0,0,0,.16)!important}
+[data-testid="stMetricLabel"]{color:#b8cad8!important}
+[data-testid="stMetricValue"]{color:#f4f8fb!important}
+[data-testid="stMarkdownContainer"] p,[data-testid="stMarkdownContainer"] li{color:#c4d2de}
+[data-testid="stAlert"]{background:#1c2b38!important;border:1px solid #405667!important}
+[data-testid="stDataFrame"]{border:1px solid #405667!important;border-radius:12px!important}
+.stTextInput input,.stTextArea textarea{background:#14212c!important;color:#edf4f8!important;border:1px solid #405668!important}
+.stButton button,.stDownloadButton button{background:#263b4d!important;color:#f4f8fb!important;border:1px solid #456176!important;border-radius:10px!important}
+.stButton button:hover,.stDownloadButton button:hover{background:#304b60!important}
+</style>
+""",unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 :root{--bg:#101923;--panel:#192633;--panel2:#203241;--line:#304454;--text:#e8eef4;--muted:#a9bac9;--teal:#55c4b2;--blue:#7da9df;--amber:#e7b66a}
