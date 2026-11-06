@@ -7,6 +7,7 @@ from modules.evaluation_dashboard import load_evaluation_metrics
 from modules.scenario_generator import generate_activity
 from modules.config_store import load_config, save_config
 from modules.system_health import check_system_health
+from modules.demo_scenario import run_demo_scenario
 from modules.data_loader import load_activity
 from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
@@ -152,6 +153,31 @@ with st.expander("System health • Project readiness"):
   st.warning("Review Attention items above before your project demonstration.")
  else:
   st.success("All current availability checks passed. This is not production approval.")
+
+# Guided walkthrough runs only fixed fictional events and does not alter saved cases.
+with st.expander("Project demonstration • Guided synthetic scenario"):
+ st.caption("Safe classroom walkthrough using fictional activity only; no real employee data.")
+ if st.button("Run guided demonstration",key="run_demo_scenario"):
+  st.session_state["demo_scenario_result"]=run_demo_scenario()
+ if "demo_scenario_result" in st.session_state:
+  demo=st.session_state["demo_scenario_result"]
+  st.markdown("### "+demo["title"])
+  for step in demo["steps"]:
+   st.markdown("**"+step["title"]+"**")
+   st.write(step["detail"])
+  st.write("**Synthetic events**")
+  st.dataframe(pd.DataFrame(demo["events"]),width="stretch",hide_index=True)
+  if demo["results"]:
+   demo_result=demo["results"][0]
+   demo_alert=demo_result["alert"]
+   demo_col1,demo_col2,demo_col3=st.columns(3)
+   demo_col1.metric("Correlated events",demo_alert["event_count"])
+   demo_col2.metric("Risk score",str(demo_alert["risk_score"])+"/100")
+   demo_col3.metric("Risk level",demo_alert["risk_level"])
+   st.write("**Score explanation**")
+   for reason in demo_alert["reasons"]:
+    st.write("- "+reason)
+   st.info("Demo alert is illustrative only. It is not saved to the case register and is not evidence of misconduct.")
 
 df=load_activity(); baseline=detect_baseline(df)
 records=[]
