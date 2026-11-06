@@ -8,6 +8,7 @@ from modules.scenario_generator import generate_activity
 from modules.config_store import load_config, save_config
 from modules.system_health import check_system_health
 from modules.demo_scenario import run_demo_scenario
+from modules.finalization_panel import render_finalization_panel
 from modules.data_loader import load_activity
 from modules.baseline_detector import detect_baseline
 from modules.event_correlator import correlate_events
@@ -153,6 +154,8 @@ with st.expander("System health • Project readiness"):
   st.warning("Review Attention items above before your project demonstration.")
  else:
   st.success("All current availability checks passed. This is not production approval.")
+
+render_finalization_panel()
 
 # Guided walkthrough runs only fixed fictional events and does not alter saved cases.
 with st.expander("Project demonstration • Guided synthetic scenario"):
