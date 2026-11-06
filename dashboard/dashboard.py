@@ -476,3 +476,27 @@ with st.expander("Generate and review viva questions"):
         st.download_button("Download viva study guide (Markdown)",
             render_markdown(viva_items).encode("utf-8"),
             "ITRM_Viva_Study_Guide.md", "text/markdown")
+
+
+# Full integration validation runs the repository unittest suite locally on demand.
+st.subheader("Final system validation • Integration tests")
+st.caption("Runs the complete unittest suite in the project directory. This may take a little time; it does not connect to organizational systems.")
+if st.button("Run full system validation", key="run_final_validation"):
+    with st.spinner("Running all project tests..."):
+        from modules.final_validation import run_validation, save_report
+        validation = run_validation()
+        save_report(validation)
+        st.session_state["final_validation_result"] = validation
+if "final_validation_result" in st.session_state:
+    validation = st.session_state["final_validation_result"]
+    if validation["passed"]:
+        st.success("Validation passed: all discovered tests completed successfully.")
+    elif validation["status"] == "TIMEOUT":
+        st.warning(validation.get("error") or "Validation timed out.")
+    else:
+        st.error("Validation failed. Inspect the test output below.")
+    st.code(validation["output"][-12000:] or "No test output captured.", language="text")
+    st.download_button("Download validation report (JSON)",
+        __import__("json").dumps(validation,indent=2).encode("utf-8"),
+        "final_validation.json","application/json")
+    st.caption("Saved reports: results/final_validation.json and results/final_validation.md")
